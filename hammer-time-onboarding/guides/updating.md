@@ -5,12 +5,13 @@ How every state-changing run ends: record it, package it, get the user to save i
 ## 1. Record
 
 ```
-python3 <skill>/scripts/ht.py score --topic t03 --result guided --note "Knew LEFT JOIN keeps unmatched rows; missed that WHERE on the right table turns it into an inner join"
+python3 <skill>/scripts/ht.py score --topic t03 --result guided --note "Asked why a LEFT JOIN report lost suppliers. Knew unmatched rows are kept; missed that WHERE on the right table turns it into an inner join"
 ```
 
 - `--result` is one of `first_try`, `guided`, `partial`, `missed` (see `reference/scoring.md`).
-- `--note` is one line on what they showed or what was missing. Reviews are written from these
-  notes, so make it specific enough to be useful three weeks from now.
+- `--note` is one line. Start with what you asked, then what they showed and what was missing.
+  Later questions avoid repeats and reviews find patterns from these notes, so make it specific
+  enough to be useful three weeks from now.
 
 Never edit `state.json` yourself, even to fix a typo. If a score went in wrong, tell the user and
 record the next answer properly. Don't try to reverse it.

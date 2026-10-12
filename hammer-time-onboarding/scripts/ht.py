@@ -40,6 +40,7 @@ LEVELUP_DEFAULT = 30    # where a levelled-up topic starts unless the user says 
 LEVELUP_THRESHOLD = 90  # at or above this, suggest a harder version of the topic
 MIN_TOPICS, MAX_TOPICS = 5, 15
 LOG_LIMIT = 20
+RECENT_LIMIT = 3  # results kept per topic, so questions don't repeat once the log has moved on
 TITLE_MAX = 60          # keeps the generated SKILL.md description under claude.ai's 1024 limit
 DESCRIPTION_MAX = 1024
 RESERVED_WORDS = ("anthropic", "claude")  # claude.ai refuses skill names containing these
@@ -237,6 +238,8 @@ def print_brief(state, t):
                 break
     if last:
         print("LAST TIME: %s, %s. %s" % last)
+        for e in t.get("recent", [])[1:]:
+            print("BEFORE THAT: %s, %s. %s" % (e["date"], e["result"], e["note"]))
     elif t["times_asked"]:
         print("LAST TIME: %s, result no longer in the log" % t["last_asked"])
     else:
@@ -383,6 +386,8 @@ def cmd_score(args):
     t["last_asked"] = today()
     t["last_result"] = args.result
     t["last_note"] = args.note.strip()
+    t["recent"] = ([{"date": today(), "result": args.result, "note": args.note.strip()}]
+                   + t.get("recent", []))[:RECENT_LIMIT]
     entry = {
         "date": today(),
         "topic": t["id"],

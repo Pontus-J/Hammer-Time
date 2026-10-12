@@ -102,10 +102,17 @@ ok "score needs a note"
 python3 "$H" score --topic t01 --result missed --note "n" | grep -q "SCORE: 5 -> 0" || fail "floor at 0"
 python3 "$H" score --topic t01 --result missed --note "n" | grep -q "SCORE: 0 -> 0" || fail "floor at 0"
 ok "score floors at 0"
-python3 "$H" score --topic t05 --result first_try --note "n" | grep -q "SCORE: 50 -> 55" || fail "first_try +5"
-python3 "$H" score --topic t05 --result guided --note "n" | grep -q "SCORE: 55 -> 57" || fail "guided +2"
-python3 "$H" score --topic t05 --result partial --note "n" | grep -q "SCORE: 57 -> 57" || fail "partial 0"
+python3 "$H" score --topic t05 --result first_try --note "a" | grep -q "SCORE: 50 -> 55" || fail "first_try +5"
+python3 "$H" score --topic t05 --result guided --note "b" | grep -q "SCORE: 55 -> 57" || fail "guided +2"
+python3 "$H" score --topic t05 --result partial --note "c" | grep -q "SCORE: 57 -> 57" || fail "partial 0"
 ok "ladder +5 / +2 / 0"
+python3 "$H" score --topic t05 --result partial --note "d" >/dev/null
+python3 "$H" show --topic t05 | grep -A2 "^LAST TIME" > "$T/recent"
+grep -q "^LAST TIME: .*, partial. d$" "$T/recent" || fail "latest result first"
+[ "$(grep -c "^BEFORE THAT" "$T/recent")" = 2 ] || fail "brief should carry two earlier results"
+grep -q "^BEFORE THAT: .*, guided. b$" "$T/recent" || fail "earlier results newest first"
+python3 "$H" show --topic t05 | grep -q ", first_try. a$" && fail "only the last three results are kept"
+ok "brief shows the last three results on the topic"
 
 i=0; while [ $i -lt 20 ]; do python3 "$H" score --topic t02 --result first_try --note "n" >/dev/null; i=$((i+1)); done
 python3 - "$T" <<'EOF'

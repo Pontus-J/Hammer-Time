@@ -17,7 +17,7 @@ last answer on this topic (`LAST TIME` in the brief) was `first_try`, easier if 
 
 | score | step | example shape |
 |---|---|---|
-| 0-15 | Definitions | "What is a LEFT JOIN?" |
+| 0-15 | Definitions | "What does a LEFT JOIN give you that an INNER JOIN doesn't?" |
 | 16-34 | How and why it works | "Why does a LEFT JOIN return NULLs, and when is that a problem?" |
 | 35-49 | Apply in a scenario | "Finance wants every supplier listed, paid or not. Write the query and explain the join." |
 | 50-64 | Trade-offs, two concepts at once | "This report runs in 4 minutes. Join first or aggregate first? Why?" |
@@ -34,10 +34,10 @@ Flat across all bands. A clear miss costs as much as a clean answer earns.
 
 | result | meaning | change |
 |---|---|---|
-| `first_try` | clear understanding with no help | +5 |
-| `guided` | got there fully with guiding, within three exchanges | +2 |
-| `partial` | part of it, after up to three guiding exchanges | 0 |
-| `missed` | still lost after three exchanges, or "I don't know" | -5 |
+| `first_try` | every key point with its reasoning, no help (a plain "why?" isn't help) | +5 |
+| `guided` | every key point, with help, within three exchanges | +2 |
+| `partial` | some key points after three exchanges | 0 |
+| `missed` | none of them, or they gave up | -5 |
 
 Scores stay between 0 and 100. `ht.py` applies this; you only pick the result.
 

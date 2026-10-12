@@ -60,8 +60,8 @@ The branches to cover. Not every area needs every one, and answers will open oth
 6. **Standards and versions.** Which jurisdiction, framework, dialect or version. (UK or US GAAP,
    Postgres or T-SQL, Python 3.12.)
 7. **What to leave out.** Things they already know cold, or don't care about.
-8. **Tone.** Default is blunt and Socratic: no praise for mediocre answers, challenge the
-   reasoning and not the person. Ask only whether they want it softer.
+8. **Tone.** Default is blunt and Socratic: no praise words, talk about the answer and not the
+   person. Ask only whether they want it softer. Softer changes the wording, not the scoring.
 
 The grill is done when the frontier is empty: every branch visited, nothing silently assumed.
 Then summarise what you heard in five or six lines and ask the user to confirm before moving on.
