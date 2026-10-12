@@ -13,7 +13,7 @@ A score is how deep the user's understanding of one topic goes. It is not a coun
 ## Difficulty gradient
 
 Pitch each question at the step for the topic's current score. Within a step, lean harder if the
-last answer on this topic (see the log in `state.json`) was `first_try`, easier if it was `missed`.
+last answer on this topic (`LAST TIME` in the brief) was `first_try`, easier if it was `missed`.
 
 | score | step | example shape |
 |---|---|---|
@@ -35,7 +35,7 @@ Flat across all bands. A clear miss costs as much as a clean answer earns.
 | result | meaning | change |
 |---|---|---|
 | `first_try` | clear understanding with no help | +5 |
-| `guided` | got there after one or two nudges | +2 |
+| `guided` | got there fully with guiding, within three exchanges | +2 |
 | `partial` | part of it, after up to three guiding exchanges | 0 |
 | `missed` | still lost after three exchanges, or "I don't know" | -5 |
 

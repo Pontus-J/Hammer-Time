@@ -110,7 +110,8 @@ words, then ask for a starting score for each topic.
 ```
 
    `slug` becomes the skill name (`hammer-time-sql`). Keep it short: lowercase letters, digits and
-   hyphens. `language` is the language the user spoke during onboarding; ask questions in it later.
+   hyphens, and not containing "claude" or "anthropic" (claude.ai refuses those names). The area
+   title can be 60 characters at most. `language` is the language the user spoke during onboarding; ask questions in it later.
 
 2. Run `python3 <skill>/scripts/ht.py init --file /tmp/hammer-time-spec.json`. If it errors, fix
    the spec and run it again. Don't work around it.

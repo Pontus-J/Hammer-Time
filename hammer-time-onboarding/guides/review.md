@@ -10,7 +10,8 @@ python3 <skill>/scripts/ht.py review
 ```
 
 This prints every topic with its score, band and change since the last review, the last 20
-answers with their notes, topics near the top (85+), and topics never asked.
+answers with their notes, topics ready to level up (90+), topics close to it (85-89), and topics
+never asked.
 
 ## 2. Write the review
 
@@ -35,15 +36,15 @@ show just the table and the topic list check.
 Only what the user agrees to. Each one goes through the script:
 
 ```
-ht.py add-topic --title "..." --description "..." --score 30
-ht.py retire-topic --topic t07
-ht.py edit-topic --topic t04 [--title "..."] [--description "..."]
-ht.py levelup --topic t02 --title "..." --description "..." [--score 30]
+python3 <skill>/scripts/ht.py add-topic --title "..." --description "..." --score 30
+python3 <skill>/scripts/ht.py retire-topic --topic t07
+python3 <skill>/scripts/ht.py edit-topic --topic t04 [--title "..."] [--description "..."]
+python3 <skill>/scripts/ht.py levelup --topic t02 --title "..." --description "..." [--score 30]
 ```
 
 Limits: 5 to 15 active topics; new topics start at 50 at most, 20 to 35 suggested.
 
 ## 4. Finish
 
-Always run `ht.py mark-review`, so the next review shows change since today. Then `package` and the
+Always run `python3 <skill>/scripts/ht.py mark-review`, so the next review shows change since today. Then `package` and the
 save message from `guides/updating.md`, using the full table and no single-topic headline.

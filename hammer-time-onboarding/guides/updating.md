@@ -19,8 +19,8 @@ record the next answer properly. Don't try to reverse it.
 
 - **claude.ai**: `python3 <skill>/scripts/ht.py package`. It writes
   `/mnt/user-data/outputs/<skill-name>.skill`. Present that file to the user.
-- **Claude Code**: `python3 <skill>/scripts/ht.py package --install ~/.claude/skills` (or wherever
-  the skill is installed). Nothing more for the user to do.
+- **Claude Code**: `python3 <skill>/scripts/ht.py package --install`. It replaces the installed
+  skill in place. Nothing more for the user to do.
 
 ## 3. The save message
 

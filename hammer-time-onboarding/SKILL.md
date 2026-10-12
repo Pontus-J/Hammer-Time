@@ -27,8 +27,10 @@ skill made from it (`hammer-time-sql`, `hammer-time-accounting`). The only diffe
 Run this first and read the output:
 
 ```
-python3 <this skill's folder>/scripts/ht.py status
+python3 <skill>/scripts/ht.py status
 ```
+
+`<skill>` in every guide means the absolute path of the folder this `SKILL.md` is in.
 
 Then pick the mode:
 
@@ -56,7 +58,7 @@ which area they mean before doing anything.
 | `guides/review.md` | progress review and topic edits | never |
 | `reference/scoring.md` | bands, the difficulty gradient, the scoring ladder | never |
 | `scripts/ht.py` | the state engine | never |
-| `state.json` | area, profile, topics, scores, last 20 answers | only through `ht.py` |
+| `state.json` | area, profile, topics, scores, last 20 answers | only through `ht.py`; never read it, use `status` or `show` |
 | `NOTICE.md` | credit for the interview method | never |
 
 ## Platform notes
@@ -64,6 +66,6 @@ which area they mean before doing anything.
 - **claude.ai**: the installed skill is read-only. `ht.py` copies it to a work folder, changes the
   copy, and `package` writes `<skill-name>.skill` to `/mnt/user-data/outputs/`. Give the user that
   file so they can save it.
-- **Claude Code**: use `package --install ~/.claude/skills` (or the project's `.claude/skills`).
-  That writes the new version straight over the installed one, and nothing needs saving by hand.
+- **Claude Code**: use `package --install`. That writes the new version straight over the
+  installed one, wherever it is installed, and nothing needs saving by hand.
 - If you can't run code at all, say so and stop. This skill doesn't work without the script.

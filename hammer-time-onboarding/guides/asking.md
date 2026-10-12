@@ -6,13 +6,17 @@ One run is one Socratic dialogue about one topic. It ends with a score.
 
 - If the user named a topic or a niche corner of the area, use it. Score it against the active
   topic it belongs to. If it fits no topic at all, run it unscored, say so, and suggest adding it
-  as a topic in a review.
-- Otherwise use `SUGGESTED NEXT` from `ht.py status`. The rule behind it: fewest times asked, then
+  as a topic in a review. An unscored run changes nothing, so it ends without `package` or the
+  save message.
+- Otherwise use `SUGGESTED NEXT` from `ht.py status`. The rule behind it: least recently asked, then
   lowest score, and never the topic from last time. Don't override it to pick something more
   interesting.
 
-Read the topic's `description` and the profile in `state.json`. Look at the last log entry for this
-topic, if there is one, so you don't repeat the same question.
+`status` ends with a brief for the suggested topic: its description, score and difficulty step,
+what happened last time, and the user's profile. If the user picked the topic, get the same brief
+with `python3 <skill>/scripts/ht.py show --topic t04`. Build the question from the brief, ask it in
+the profile's language, and don't repeat last time's question. Don't open `state.json`; the brief
+has everything, and the file on disk can be older than the script's copy.
 
 ## 2. Ask one question
 
@@ -41,7 +45,7 @@ topic or to their work if there's a good one. Result `first_try`. Stop there.
 
 You get **at most three guiding exchanges**. Count them.
 
-- They get there after one or two: result `guided`.
+- They get there fully within the three exchanges: result `guided`.
 - After three they have part of it: result `partial`. Fill in the missing piece in two or three
   sentences.
 - After three they're still lost, or they say "I don't know" at any point: result `missed`. Give
