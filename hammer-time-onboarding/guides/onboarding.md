@@ -12,12 +12,21 @@ github.com/mattpocock/skills). Credit stays in `NOTICE.md`.
 
 ### Before the first question
 
-Tell the user, in two or three short lines:
-- this is a long interview, often 20 to 40 minutes, and nothing is saved until the end, so start
-  when they have the time
-- at the end they get a new skill named after their area, and they must save it
-- what they say about their role and goals gets stored in that skill file, so keep that in mind
-  if they plan to share it
+Open with this, close to word for word, then go straight into round 1:
+
+```
+**Hammer Time onboarding.** I'll ask what you want to learn, propose topics, and set a starting
+score for each. Usually about 10 minutes, longer if you go deep.
+
+**How to answer:** questions come in numbered rounds, each with my suggested answer (➡️).
+- Agree: reply with the number and "yes" (`Q1 yes`).
+- Disagree or unsure: say so in your own words. The more detail you give, the better the drill fits you.
+
+Nothing is saved until the end. Then you get a new skill named after your area. What you tell me
+about your role and goals is stored in it, so keep that in mind if you share it.
+```
+
+Don't add more explanation than that.
 
 ### The grill
 
@@ -43,6 +52,9 @@ Format each round like this:
 
 Word each question so that "yes" accepts your recommendation. Where only the user can know the
 answer (their job, their goal), write `➡️ (your answer)` instead of guessing.
+
+If replies don't map cleanly to the numbers (fewer answers than questions, bare "yes" lines), don't
+guess silently. Say in one line which question you took each answer for, and carry on.
 
 Facts about the subject are your job, never the user's. Don't ask "what are the main parts of
 IFRS 17?"; propose them and ask whether that's the right cut.

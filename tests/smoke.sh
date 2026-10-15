@@ -164,4 +164,13 @@ python3 "$H" package --install >/dev/null
 python3 "$H" status | grep -q "| t01 | Topic 1 | 5 |" || fail "install should update in place"
 ok "Claude Code --install (no path) updates the skill in place"
 
+python3 "$H" package --out "$T/export" >/dev/null || fail "export of an unchanged skill should work"
+(cd "$T/export" && unzip -q hammer-time-sql.skill)
+grep -q "| t01 | Topic 1 | 5 |" <<EOF || fail "export should carry the current scores"
+$(python3 "$T/export/hammer-time-sql/scripts/ht.py" status)
+EOF
+[ -f "$T/cc/hammer-time-sql/state.json" ] || fail "export must not touch the installed skill"
+python3 "$H" package 2>/dev/null && fail "plain package with no changes should still be refused"
+ok "unchanged skill exports with --out and stays installed"
+
 echo "all passed"

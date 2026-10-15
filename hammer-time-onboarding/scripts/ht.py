@@ -531,10 +531,31 @@ def cmd_mark_review(args):
     print("NEXT: run `package`.")
 
 
+def write_skill_zip(src, name, out_dir):
+    os.makedirs(out_dir, exist_ok=True)
+    out = os.path.join(out_dir, name + ".skill")
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+        for root, dirs, files in os.walk(src):
+            dirs[:] = [d for d in dirs if d != "__pycache__"]
+            for fn in sorted(files):
+                if fn.endswith(".pyc") or fn == ".DS_Store":
+                    continue
+                full = os.path.join(root, fn)
+                z.write(full, os.path.join(name, os.path.relpath(full, src)))
+    return out
+
+
 def cmd_package(args):
     wd = active_dir()
     if wd == SKILL_DIR:
-        die("nothing has changed in this session, so there is nothing to package")
+        # Nothing changed. Still allow an explicit export, e.g. to move an area to claude.ai.
+        if args.out and not args.install and os.path.isfile(state_path(wd)):
+            out = write_skill_zip(wd, read_frontmatter_name(wd), args.out)
+            print("EXPORTED: %s" % out)
+            print("Upload it under Settings > Capabilities > Skills on claude.ai.")
+            return
+        die("nothing has changed in this session, so there is nothing to package. "
+            "To export the current skill as a file, pass `--out <folder>`")
     if not os.path.isfile(state_path(wd)):
         die("no state.json in the work copy, so onboarding did not finish. Fix the spec and rerun `init`")
     name = read_frontmatter_name(wd)
@@ -554,16 +575,7 @@ def cmd_package(args):
     if out_dir is None:
         die("not on claude.ai, so there is no Save button. In Claude Code use `package --install`; "
             "to get a .skill file anyway, pass `--out <folder>`")
-    os.makedirs(out_dir, exist_ok=True)
-    out = os.path.join(out_dir, name + ".skill")
-    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
-        for root, dirs, files in os.walk(wd):
-            dirs[:] = [d for d in dirs if d != "__pycache__"]
-            for fn in sorted(files):
-                if fn.endswith(".pyc") or fn == ".DS_Store":
-                    continue
-                full = os.path.join(root, fn)
-                z.write(full, os.path.join(name, os.path.relpath(full, wd)))
+    out = write_skill_zip(wd, name, out_dir)
     rmtree(wd)
     clear_redirect()
     print("PACKAGED: %s" % out)
