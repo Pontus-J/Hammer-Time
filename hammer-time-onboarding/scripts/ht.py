@@ -358,11 +358,12 @@ def rewrite_frontmatter(d, skill_name, area_title):
     p = os.path.join(d, "SKILL.md")
     with open(p, encoding="utf-8") as f:
         text = f.read()
-    desc = ("Hammer Time drill for %s: a Socratic quiz that tracks a 0-100 score per topic and "
-            "re-saves itself with the new scores. Use ONLY when the user explicitly asks for "
-            "\"hammer time %s\", \"/%s\", or a Hammer Time progress review for %s. Do not use "
-            "for ordinary questions about %s." % (
-                area_title, skill_name[len("hammer-time-"):].replace("-", " "), skill_name, area_title, area_title))
+    words = skill_name[len("hammer-time-"):].replace("-", " ")
+    desc = ("Hammer Time drill for %s: type \"hammer time %s\" for today's question. A Socratic quiz "
+            "that tracks a 0-100 score per topic and re-saves itself with the new scores. Use ONLY "
+            "when the user explicitly asks for \"hammer time %s\", \"/%s\", or a Hammer Time "
+            "progress review for %s. Do not use for ordinary questions about %s." % (
+                area_title, words, words, skill_name, area_title, area_title))
     desc = desc.replace("<", "").replace(">", "")
     if len(desc) > DESCRIPTION_MAX:
         die("generated description is %d characters, over the %d limit; shorten area.title"

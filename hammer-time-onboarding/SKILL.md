@@ -1,6 +1,6 @@
 ---
 name: hammer-time-onboarding
-description: "Hammer Time: set up a Socratic drill that hammers in knowledge about one area, scores each topic 0-100 and re-saves itself with the new scores. Use ONLY when the user explicitly asks to start Hammer Time, runs /hammer-time or /hammer-time-onboarding, or asks to set up a new Hammer Time area."
+description: "Hammer Time: type \"hammer time\" to start. A Socratic drill that hammers one subject in, one question a day, scoring each topic 0-100 and re-saving itself with the new scores. Use when the user says \"hammer time\", \"start hammer time\", runs /hammer-time or /hammer-time-onboarding, or asks to set up a new Hammer Time subject. Do not use for ordinary study questions."
 ---
 
 # Hammer Time
@@ -68,4 +68,6 @@ which area they mean before doing anything.
   file so they can save it.
 - **Claude Code**: use `package --install`. That writes the new version straight over the
   installed one, wherever it is installed, and nothing needs saving by hand.
-- If you can't run code at all, say so and stop. This skill doesn't work without the script.
+- If you can't run code at all, the skill can't work. Tell the user exactly this and stop:
+  "Hammer Time needs code execution. On claude.ai go to **Settings > Capabilities**, turn on
+  **Code execution and file creation**, then start a new chat and type **hammer time** again."

@@ -16,7 +16,7 @@ Right first time is +5. A clear miss is -5. Past 90, it offers you a harder vers
 
 ## How it works
 
-1. **Install `hammer-time-onboarding`** (see below) and say "start hammer time".
+1. **Install `hammer-time-onboarding`** (see below) and type "hammer time".
 2. **Onboarding.** It grills you on what you want to learn, why, where you'll use it and where you
    are now, in numbered rounds with a suggested answer for each: reply `Q1 yes` to agree, or say
    more. Usually about 10 minutes. It proposes 5 to 15 topics, you edit them, then you set a
@@ -32,12 +32,12 @@ One area per skill. Keep the topics in an area related to each other.
 
 ## Install
 
-**claude.ai**: needs code execution turned on (Settings → Capabilities). Download
-`hammer-time-onboarding.skill` from `dist/` and upload it under Settings → Capabilities → Skills.
-After each run, click **Save skill** on the file Claude gives you.
+**claude.ai**: download `hammer-time-onboarding.skill` from `dist/` and upload it under Settings →
+Capabilities → Skills. Then type "hammer time" in a new chat. The skill explains everything else,
+including turning on code execution if it's off.
 
-**Claude Code**: copy the `hammer-time-onboarding` folder into `~/.claude/skills/`. Runs update the
-installed skill directly, so there's nothing to save by hand.
+**Claude Code**: copy the `hammer-time-onboarding` folder into `~/.claude/skills/` and type
+"hammer time". Runs update the installed skill directly, so there's nothing to save by hand.
 
 **Status:** tested end to end in Claude Code. On claude.ai, whether **Save skill** from a chat keeps
 the whole folder (scripts and guides) or only `SKILL.md` is not yet confirmed. If only `SKILL.md`

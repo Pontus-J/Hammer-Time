@@ -12,21 +12,29 @@ github.com/mattpocock/skills). Credit stays in `NOTICE.md`.
 
 ### Before the first question
 
-Open with this, close to word for word, then go straight into round 1:
+The user may know nothing about this skill beyond its name. This message is their whole manual.
+Send it close to word for word, then **stop and wait**. Start round 1 only when they say they're ready.
 
 ```
-**Hammer Time onboarding.** I'll ask what you want to learn, propose topics, and set a starting
-score for each. Usually about 10 minutes, longer if you go deep.
+**Welcome to Hammer Time.** It drills one subject into you, one question a day. Each topic gets a
+score from 0 to 100, and the questions get harder as your score rises.
+
+**First, a short setup (about 10 minutes, longer if you go deep).** I'll ask what you want to
+learn and why, then propose topics and starting scores.
 
 **How to answer:** questions come in numbered rounds, each with my suggested answer (➡️).
 - Agree: reply with the number and "yes" (`Q1 yes`).
-- Disagree or unsure: say so in your own words. The more detail you give, the better the drill fits you.
+- Disagree or unsure: say so in your own words. The more detail you give, the better it fits you.
 
-Nothing is saved until the end. Then you get a new skill named after your area. What you tell me
-about your role and goals is stored in it, so keep that in mind if you share it.
+**At the end** you get a new skill named after your subject. Save it, and from then on start each
+day's question by typing its name. What you tell me about your role and goals is stored in it, so
+keep that in mind if you share it.
+
+Ready to start?
 ```
 
-Don't add more explanation than that.
+On Claude Code, replace "Save it" with "It installs itself". Don't add more explanation than that.
+If they say not now, tell them to type "hammer time" whenever they're ready, and stop.
 
 ### The grill
 
@@ -127,8 +135,10 @@ words, then ask for a starting score for each topic.
 
 2. Run `python3 <skill>/scripts/ht.py init --file /tmp/hammer-time-spec.json`. If it errors, fix
    the spec and run it again. Don't work around it.
-3. Run `package` and finish with the save message from `guides/updating.md`. Add one line: their
-   onboarding template is untouched, so they can run it again for a different area.
+3. Run `package` and finish with the save message from `guides/updating.md`. Then add two lines:
+   - how to start: "Tomorrow, open a new chat and type **hammer time <area words>**." (the skill
+     name without `hammer-time-`, hyphens as spaces)
+   - their onboarding skill is untouched, so they can type "hammer time" again for another subject.
 
 Don't ask a first quiz question in the same run. Saving is the whole point of this step.
 
