@@ -43,7 +43,7 @@ Scores stay between 0 and 100. `ht.py` applies this; you only pick the result.
 
 ## Fixed numbers
 
-- 5 to 15 active topics.
-- Starting scores: 0 to 50. Suggest 20-35; above 35 only if the user can explain the basics unprompted.
+- 5 to 15 active topics; 5 to 8 recommended.
+- Starting scores: 0 to 50. Proposed from what the user said; most land at 15-20, above 20 only if the user can explain the basics unprompted.
 - A topic at 90+ is offered a harder version. The harder version starts at 30 by default.
 - The log keeps the last 20 answers.

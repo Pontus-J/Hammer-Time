@@ -26,6 +26,8 @@ Pitch it at the step in `reference/scoring.md` that matches the topic's score.
 
 - One question, one idea. No multi-part lists.
 - From 35 up, set it in the user's world, using the profile.
+- Never invent how the user's company works. Scenarios use public knowledge of the subject plus
+  what the profile says; if a detail would be company-specific, keep it generic.
 - Answerable by a strong person in their role. No trick questions, no trivia, no gotchas about edge
   cases nobody meets.
 - Free text only. No multiple choice.

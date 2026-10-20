@@ -48,4 +48,6 @@ Click **Save skill** on the file above. It replaces your current `<skill-name>`.
 If `ht.py` printed `LEVEL UP`, add one line after the table offering a harder version of that topic
 next time (`guides/onboarding.md`, part B). Don't start it in this run.
 
-Then stop. Don't offer another question. One a day is the design.
+End with one short line: **One more?** Nothing else. If they say yes, run `status` again and go
+back to `guides/asking.md`; scores from this chat carry over. Otherwise stop. After onboarding or a
+review, skip the line.

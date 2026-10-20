@@ -23,19 +23,29 @@ Right first time is +5. A clear miss is -5. Past 90, it offers you a harder vers
 
 ## How it works
 
-1. **Install `hammer-time-onboarding`** (see below) and type "hammer time".
-2. **Onboarding.** It grills you on what you want to learn, why, where you'll use it and where you
+1. **Onboarding.** It grills you on what you want to learn, why, where you'll use it and where you
    are now, in numbered rounds with a suggested answer for each: reply `Q1 yes` to agree, or say
-   more. Usually about 10 minutes. It proposes 5 to 15 topics, you edit them, then you set a
-   starting score for each (50 at most; 20 to 35 is usually right).
-3. **It hands you a new skill**, e.g. `hammer-time-sql`. Save it. Your onboarding template stays as
+   more. Usually about 10 minutes. It checks your subject is narrow enough and something it can
+   know (public knowledge, not your company's internals), proposes 5 to 8 topics for you to edit,
+   then proposes a starting score for each from what you told it (usually 15 to 20, 50 at most).
+   It can also give you a daily calendar reminder.
+2. **It hands you a new skill**, e.g. `hammer-time-sql`. Save it. Your onboarding template stays as
    it was, so you can onboard another area later.
-4. **Every day after that**, say "hammer time sql". One question, a short back and forth, a score,
-   and an updated skill file. **Save it every time.** That's how the scores persist.
-5. **Now and then**, ask for "hammer time sql review" to see where you stand, what keeps tripping
+3. **Every day after that**, say "hammer time sql". One question, a short back and forth, a score,
+   and an updated skill file. **Save it every time.** That's how the scores persist. Say yes to
+   "One more?" if you want another.
+4. **Now and then**, ask for "hammer time sql review" to see where you stand, what keeps tripping
    you up and whether to change topics.
 
 One area per skill. Keep the topics in an area related to each other.
+
+## Why the script
+
+The skill changes itself after every run, and a model asked to rewrite a long file while changing
+one number will eventually paraphrase a rule or drop a line without anyone noticing. So the model
+never rewrites anything. `scripts/ht.py` changes the scores in `state.json`, keeps a log of the last
+20 answers, picks the next topic, and repackages the skill as an exact copy of what's installed plus
+the new state. The model runs the conversation; the script keeps the books.
 
 ## Install
 
@@ -47,21 +57,12 @@ skill tells you how to turn it on.
 **Claude Code**: copy the `hammer-time-onboarding` folder into `~/.claude/skills/` and type
 "hammer time". Runs update the installed skill directly, so there's nothing to save by hand.
 
-**Status:** tested end to end in Claude Code. On claude.ai, whether **Save skill** from a chat keeps
-the whole folder (scripts and guides) or only `SKILL.md` is not yet confirmed. If only `SKILL.md`
-survives, download the file after each run and re-upload it in Settings instead.
+**Status:** in daily use on claude.ai, where **Save skill** keeps the whole folder and the scores
+carry over, and tested end to end in Claude Code.
 
 **Moving an area between the two**: in Claude Code, run
 `python3 ~/.claude/skills/hammer-time-<area>/scripts/ht.py package --out ~/Desktop` and upload the
 `.skill` file on claude.ai. Use one platform per area from then on; the two copies don't sync.
-
-## Why the script
-
-The skill changes itself after every run, and a model asked to rewrite a long file while changing
-one number will eventually paraphrase a rule or drop a line without anyone noticing. So the model
-never rewrites anything. `scripts/ht.py` changes the scores in `state.json`, keeps a log of the last
-20 answers, picks the next topic, and repackages the skill as an exact copy of what's installed plus
-the new state. The model runs the conversation; the script keeps the books.
 
 ## Credits
 

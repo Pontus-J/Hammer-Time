@@ -154,8 +154,27 @@ assert len(s["archived_topics"]) == 1 and s["archived_topics"][0]["final_score"]
 assert s["topics"][1]["title"] == "Hard t02"
 EOF
 ok "second package carries level-up, archive and review snapshot"
+python3 "$H" status | grep -q "UNPACKAGED CHANGES" && fail "status right after package should not flag unpackaged changes"
+python3 "$H" score --topic t01 --result first_try --note "one more" | grep -q "SCORE: 0 -> 5" || fail "one more should build on the packaged run"
+python3 "$H" status | grep -q "UNPACKAGED CHANGES" || fail "a score after package should flag unpackaged changes"
+python3 "$H" package --out "$T/out3" >/dev/null
+(cd "$T/out3" && unzip -q hammer-time-sql.skill)
+grep -q '"note": "one more"' "$T/out3/hammer-time-sql/state.json" || fail "second package in a chat should carry both runs"
+ok "one more in the same chat builds on the first run"
+
+python3 "$H" reminder --time 8:30 --out "$T/rem" 2>/dev/null && fail "time must be HH:MM"
+python3 "$H" reminder --time 08:30 --out "$T/rem" >/dev/null
+ICS="$T/rem/hammer-time-sql-reminder.ics"
+grep -q "^RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR" "$ICS" || fail "weekdays by default"
+grep -q "^DTSTART:[0-9]\{8\}T083000" "$ICS" || fail "start at 08:30 local time"
+grep -q "^SUMMARY:Hammer time sql" "$ICS" || fail "event named after the area"
+python3 "$H" reminder --time 07:00 --days daily --out "$T/rem" >/dev/null
+grep -q "^RRULE:FREQ=DAILY" "$ICS" || fail "daily rule"
+ok "reminder writes a recurring calendar event"
 
 # 3. Claude Code install path ---------------------------------------------------
+# A new chat starts with no work copies (a fresh sandbox on claude.ai).
+rm -rf "$TMPDIR/hammer-time-work"
 mkdir -p "$T/cc"
 cp -R "$T/out2/hammer-time-sql" "$T/cc/"
 H="$T/cc/hammer-time-sql/scripts/ht.py"

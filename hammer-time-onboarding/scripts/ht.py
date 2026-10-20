@@ -137,6 +137,11 @@ def clear_redirect():
         os.remove(redirect_path())
 
 
+def packaged_marker(wd):
+    # Present while the work copy matches the last .skill file handed to the user.
+    return os.path.join(WORK_ROOT, os.path.basename(wd) + ".packaged")
+
+
 def ensure_work_copy():
     src = active_dir()
     if src != SKILL_DIR:
@@ -159,6 +164,8 @@ def begin_change():
     """Check there is state to change, then return the work copy and its state."""
     load_state()  # dies before any copying if this copy was never onboarded
     wd = ensure_work_copy()
+    if os.path.isfile(packaged_marker(wd)):
+        os.remove(packaged_marker(wd))
     return wd, load_state(wd)
 
 
@@ -228,17 +235,11 @@ def print_brief(state, t):
     print("TOPIC: %s %s" % (t["id"], t["title"]))
     print("SCORE: %d, %s band, step: %s" % (t["score"], band(t["score"]), step(t["score"])))
     print("DESCRIPTION: %s" % t["description"])
-    last = None
-    if t.get("last_result"):
-        last = (t["last_asked"], t["last_result"], t.get("last_note", ""))
-    else:  # skills scored before last_result was stored: fall back to the log
-        for e in reversed(state["log"]):
-            if e["topic"] == t["id"]:
-                last = (e["date"], e["result"], e["note"])
-                break
-    if last:
-        print("LAST TIME: %s, %s. %s" % last)
-        for e in t.get("recent", [])[1:]:
+    # Skills scored before `recent` was stored fall back to the log.
+    recent = t.get("recent") or [e for e in reversed(state["log"]) if e["topic"] == t["id"]][:RECENT_LIMIT]
+    if recent:
+        print("LAST TIME: %s, %s. %s" % (recent[0]["date"], recent[0]["result"], recent[0]["note"]))
+        for e in recent[1:]:
             print("BEFORE THAT: %s, %s. %s" % (e["date"], e["result"], e["note"]))
     elif t["times_asked"]:
         print("LAST TIME: %s, result no longer in the log" % t["last_asked"])
@@ -265,7 +266,8 @@ def cmd_status(args):
         return
     print("MODE: active")
     print("AREA: %s (skill name %s)" % (state["area"]["title"], state["skill_name"]))
-    if active_dir() != SKILL_DIR:
+    wd = active_dir()
+    if wd != SKILL_DIR and not os.path.isfile(packaged_marker(wd)):
         print("UNPACKAGED CHANGES: an earlier run changed state but never ran `package`. "
               "These scores include them; `package` at the end of this run saves them too.")
     print()
@@ -385,8 +387,6 @@ def cmd_score(args):
     t["score"] = clamp(before + delta)
     t["times_asked"] += 1
     t["last_asked"] = today()
-    t["last_result"] = args.result
-    t["last_note"] = args.note.strip()
     t["recent"] = ([{"date": today(), "result": args.result, "note": args.note.strip()}]
                    + t.get("recent", []))[:RECENT_LIMIT]
     entry = {
@@ -532,6 +532,45 @@ def cmd_mark_review(args):
     print("NEXT: run `package`.")
 
 
+def cmd_reminder(args):
+    state = load_state()
+    if not re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", args.time):
+        die("--time must be HH:MM in 24-hour time, e.g. 08:30")
+    out_dir = args.out or (CLAUDE_AI_OUTPUTS if os.path.isdir(CLAUDE_AI_OUTPUTS) else None)
+    if out_dir is None:
+        die("not on claude.ai; pass `--out <folder>` for the .ics file")
+    words = state["skill_name"][len("hammer-time-"):].replace("-", " ")
+    start = dt.date.today() + dt.timedelta(days=1)
+    if args.days == "weekdays":
+        while start.weekday() > 4:  # the first event has to be one the rule repeats
+            start += dt.timedelta(days=1)
+        rule = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"
+    else:
+        rule = "FREQ=DAILY"
+    # No time zone on DTSTART: calendars read it as the user's local time.
+    lines = [
+        "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Hammer Time//EN",
+        "BEGIN:VEVENT",
+        "UID:%s-reminder@hammer-time" % state["skill_name"],
+        "DTSTAMP:" + dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
+        "DTSTART:%sT%s00" % (start.strftime("%Y%m%d"), args.time.replace(":", "")),
+        "DURATION:PT10M",
+        "RRULE:" + rule,
+        "SUMMARY:Hammer time %s" % words,
+        "DESCRIPTION:Open a new chat at https://claude.ai/new and type: hammer time %s" % words,
+        "URL:https://claude.ai/new",
+        "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Hammer time %s" % words, "TRIGGER:PT0M", "END:VALARM",
+        "END:VEVENT", "END:VCALENDAR",
+    ]
+    os.makedirs(out_dir, exist_ok=True)
+    out = os.path.join(out_dir, "%s-reminder.ics" % state["skill_name"])
+    with open(out, "w", encoding="utf-8", newline="") as f:
+        f.write("\r\n".join(lines) + "\r\n")
+    print("REMINDER: %s" % out)
+    print("%s at %s, local time, from %s. The user opens the file to add it to their calendar."
+          % ("Weekdays" if args.days == "weekdays" else "Every day", args.time, start.isoformat()))
+
+
 def write_skill_zip(src, name, out_dir):
     os.makedirs(out_dir, exist_ok=True)
     out = os.path.join(out_dir, name + ".skill")
@@ -569,6 +608,8 @@ def cmd_package(args):
         shutil.copytree(wd, dest)
         rmtree(wd)
         clear_redirect()
+        if os.path.isfile(packaged_marker(wd)):
+            os.remove(packaged_marker(wd))
         print("INSTALLED: %s" % dest)
         return
 
@@ -577,8 +618,14 @@ def cmd_package(args):
         die("not on claude.ai, so there is no Save button. In Claude Code use `package --install`; "
             "to get a .skill file anyway, pass `--out <folder>`")
     out = write_skill_zip(wd, name, out_dir)
-    rmtree(wd)
-    clear_redirect()
+    if os.path.isfile(redirect_path()):
+        # Fresh from onboarding: put the template back, so it can onboard another area.
+        rmtree(wd)
+        clear_redirect()
+    else:
+        # Keep the work copy, so "one more" in the same chat builds on this run. The installed
+        # skill doesn't change until the user saves the file.
+        open(packaged_marker(wd), "w").close()
     print("PACKAGED: %s" % out)
     print("The user must save this file as their skill, or today's scores are lost.")
 
@@ -629,6 +676,12 @@ def main():
 
     sub.add_parser("review", help="print the data for a progress review").set_defaults(fn=cmd_review)
     sub.add_parser("mark-review", help="snapshot scores as the new review baseline").set_defaults(fn=cmd_mark_review)
+
+    s = sub.add_parser("reminder", help="write a recurring calendar event (.ics) for the daily question")
+    s.add_argument("--time", required=True, help="HH:MM, the user's local time")
+    s.add_argument("--days", choices=["weekdays", "daily"], default="weekdays")
+    s.add_argument("--out", help="folder for the .ics file (default: claude.ai outputs)")
+    s.set_defaults(fn=cmd_reminder)
 
     s = sub.add_parser("package", help="turn this session's changes into a .skill file, or install locally")
     g = s.add_mutually_exclusive_group()

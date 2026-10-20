@@ -40,6 +40,7 @@ Then pick the mode:
 | `MODE: active` | a question, or nothing specific | Ask | `guides/asking.md`, then `guides/updating.md` |
 | `MODE: active` | a progress review, or to change topics | Review | `guides/review.md` |
 | `MODE: active` | a harder version of a topic | Level up | `guides/onboarding.md` (part B) |
+| `MODE: active` | a daily reminder | Reminder | `guides/onboarding.md` (Daily reminder) |
 
 Read the guide for the mode before saying anything to the user. Read `reference/scoring.md` before
 asking or scoring a question. Don't load guides you don't need.
@@ -49,23 +50,19 @@ which area they mean before doing anything.
 
 ## Where things are
 
-| file | what | changes? |
+The guides, `reference/scoring.md`, `scripts/ht.py` and `NOTICE.md` never change. Two files do:
+
+| file | what | changes |
 |---|---|---|
 | `SKILL.md` | this router | renamed once, by `init` |
-| `guides/onboarding.md` | the grill, topic list, starting scores, level-up | never |
-| `guides/asking.md` | how to run one Socratic question | never |
-| `guides/updating.md` | scoring the answer, packaging, the save message | never |
-| `guides/review.md` | progress review and topic edits | never |
-| `reference/scoring.md` | bands, the difficulty gradient, the scoring ladder | never |
-| `scripts/ht.py` | the state engine | never |
 | `state.json` | area, profile, topics, scores, last 20 answers | only through `ht.py`; never read it, use `status` or `show` |
-| `NOTICE.md` | credit for the interview method | never |
 
 ## Platform notes
 
 - **claude.ai**: the installed skill is read-only. `ht.py` copies it to a work folder, changes the
   copy, and `package` writes `<skill-name>.skill` to `/mnt/user-data/outputs/`. Give the user that
-  file so they can save it.
+  file so they can save it. The work copy stays for the rest of the chat, so a second question
+  builds on the first.
 - **Claude Code**: use `package --install`. That writes the new version straight over the
   installed one, wherever it is installed, and nothing needs saving by hand.
 - If you can't run code at all, the skill can't work. Tell the user exactly this and stop:

@@ -36,13 +36,13 @@ show just the table and the topic list check.
 Only what the user agrees to. Each one goes through the script:
 
 ```
-python3 <skill>/scripts/ht.py add-topic --title "..." --description "..." --score 30
+python3 <skill>/scripts/ht.py add-topic --title "..." --description "..." --score 20
 python3 <skill>/scripts/ht.py retire-topic --topic t07
 python3 <skill>/scripts/ht.py edit-topic --topic t04 [--title "..."] [--description "..."]
 python3 <skill>/scripts/ht.py levelup --topic t02 --title "..." --description "..." [--score 30]
 ```
 
-Limits: 5 to 15 active topics; new topics start at 50 at most, 20 to 35 suggested.
+Limits: 5 to 15 active topics; new topics start at 50 at most, 15 to 20 suggested.
 
 ## 4. Finish
 
