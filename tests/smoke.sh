@@ -84,6 +84,13 @@ log = [{"topic": "t2"}, {"topic": "t3"}, {"topic": "t2"}, {"topic": "t3"}]
 assert ht.pick_topic({"topics": topics, "log": log})["id"] == "t1"
 EOF2
 ok "a topic asked often but long ago beats a new one asked lately"
+python3 - "$REPO" <<'EOF2'
+import sys; sys.path.insert(0, sys.argv[1] + "/hammer-time-onboarding/scripts"); import ht
+topics = [{"id": "t1", "score": 30, "times_asked": 0, "last_asked": None},
+          {"id": "t2", "score": 10, "times_asked": 0, "last_asked": None}]
+assert ht.pick_topic({"topics": topics, "log": []})["id"] == "t1"
+EOF2
+ok "topics never asked go in list order, basics first"
 python3 "$H" status | grep -q "^DESCRIPTION: Desc 2$" || fail "status should end with the brief for t02"
 python3 "$H" status | grep -q "^- language: English$" || fail "brief should carry the profile"
 python3 "$H" status | grep -q "^LAST TIME: never asked$" || fail "t02 was never asked"
@@ -125,9 +132,9 @@ ok "log capped at 20, score capped at 100"
 python3 "$H" status | grep -q "READY TO LEVEL UP: t02" || fail "t02 at 100 should be flagged"
 ok "90+ flagged for level up"
 
-python3 "$H" levelup --topic t02 --title "Hard t02" --description "d" | grep -q "starts at 30" || fail "levelup default 30"
+python3 "$H" levelup --topic t02 --title "Hard t02" --description "d" | grep -q "starts at 20" || fail "levelup default 20"
 python3 "$H" levelup --topic t03 --title "x" --description "d" --score 60 2>/dev/null && fail "levelup above 50 should be refused"
-ok "level up starts at 30, cap 50"
+ok "level up starts at 20, cap 50"
 python3 "$H" retire-topic --topic t03 2>/dev/null && fail "should refuse going below 5 topics"
 ok "minimum 5 topics enforced"
 i=0; while [ $i -lt 10 ]; do python3 "$H" add-topic --title "Extra $i" --description "d" --score 20 >/dev/null; i=$((i+1)); done
@@ -140,10 +147,13 @@ python3 "$H" status | grep -q "UNPACKAGED CHANGES" || fail "status should flag u
 python3 "$H" package 2>/dev/null && fail "plain package off claude.ai should be refused"
 ok "status flags unpackaged changes; plain package refused off claude.ai"
 
-python3 "$H" review | grep -q "Hard t02 | 30 | Foundation | new" || fail "review should mark the level-up topic as new"
+python3 "$H" review | grep -q "Hard t02 | 20 | Foundation | new" || fail "review should mark the level-up topic as new"
 python3 "$H" review | grep -q "t01 | Topic 1 | 0 | Foundation | -10" || fail "review delta after several scores"
 python3 "$H" review | grep -q "^READY TO LEVEL UP" && fail "nothing is at 90+ after the level up"
 ok "review shows deltas since the last review"
+python3 "$H" review | grep -q "^STUCK.*t01 Topic 1" || fail "three misses in a row should flag the topic as stuck"
+python3 "$H" review | grep -q "^ALWAYS FIRST TRY" && fail "nothing active has three first tries in a row"
+ok "review flags stuck topics"
 python3 "$H" mark-review >/dev/null
 python3 "$H" package --out "$T/out2" >/dev/null
 (cd "$T/out2" && unzip -q hammer-time-sql.skill)

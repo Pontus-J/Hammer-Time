@@ -25,9 +25,11 @@ Right first time is +5. A clear miss is -5. Past 90, it offers you a harder vers
 
 1. **Onboarding.** It grills you on what you want to learn, why, where you'll use it and where you
    are now, in numbered rounds with a suggested answer for each: reply `Q1 yes` to agree, or say
-   more. Usually about 10 minutes. It checks your subject is narrow enough and something it can
-   know (public knowledge, not your company's internals), proposes 5 to 8 topics for you to edit,
-   then proposes a starting score for each from what you told it (usually 15 to 20, 50 at most).
+   more. Usually about 10 minutes. It checks your subject suits the drill (a field with judgement
+   in it, not your company's internals or a lookup list) and offers a better version if it
+   doesn't. Then it proposes 5 to 8 topics, built from a published syllabus
+   or similar where one exists, for you to edit. Two or three quick unscored check questions set
+   a starting score for each (usually 15 to 20, 50 at most).
    It can also give you a daily calendar reminder.
 2. **It hands you a new skill**, e.g. `hammer-time-sql`. Save it. Your onboarding template stays as
    it was, so you can onboard another area later.

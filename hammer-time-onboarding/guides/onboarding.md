@@ -27,11 +27,15 @@ learn and why, then propose topics and starting scores.
 internals of any company, yours included (its systems, processes or numbers), so questions stay
 with the subject itself plus whatever you describe to me.
 
-**Picking a subject:** one you can reason about, narrow enough for 5 to 8 topics.
-- Good: "SQL for finance reporting", "How bulk annuity pricing works", "Python pandas for
-  cleaning spreadsheets"
-- Not a good fit: "Accounting" (too wide), "How my company's month-end close works" (I don't know
-  it), "Every Excel shortcut" (memorising, nothing to reason about)
+**Picking a subject:** it works best on a field you're new to or about to need, where the hard
+part is the judgement you'd normally pick up over years from experience and your manager.
+- Great: "FP&A as a new joiner: budgeting, variances, business partnering", "Accounting basics
+  for non-accountants", "Power BI for a team rolling it out: data modelling and DAX"
+- Works, but wastes it: things you could look up, like Excel shortcuts. Right or wrong, nothing
+  to reason about.
+- Won't work as is: anything that hangs on your company's people or systems, like "working with
+  my tricky marketing team". I'll help turn it into one that does: marketing basics for finance,
+  plus stakeholder management.
 
 **At the end** you get a new skill named after your subject. Save it, and from then on start each
 day's question by typing its name. What you tell me about your role and goals is stored in it, so
@@ -42,6 +46,61 @@ Ready to start?
 
 On Claude Code, replace "Save it" with "It installs itself". Don't add more explanation than that.
 If they say not now, tell them to type "hammer time" whenever they're ready, and stop.
+
+### Choosing the area
+
+Settle this in round 1, before anything else. Everything later is built on it.
+
+A good area has all four:
+- **Judgement, not lookup.** Answers have a why, and a half-right answer can be corrected. That's
+  where the back and forth earns its keep.
+- **A general field.** A discipline, a body of practice, or the ideas behind a widely used tool,
+  so public knowledge covers it well.
+- **Depth.** Room for definitions, then scenarios, then trade-offs and defending a call. Roughly
+  5 to 8 topics.
+- **A reason to need it soon.** A new job, a new area, a tool being launched, a project. Work is
+  the easiest frame; a personal subject (cooking, say) is fine too.
+
+Sort what they asked for:
+
+| kind | examples | what to do |
+|---|---|---|
+| Great | FP&A as a new joiner, controlling, accounting basics for a non-accountant, business partnering, Power BI data modelling | Go ahead |
+| Lookup | shortcuts, formula syntax, acronyms, a list of rules | Say it works but mostly tests recall, and offer the judgement version. Go with their choice |
+| Context-bound | a particular team or person, how my company does X, our internal system | Say why: the answers sit in people, history and systems you can't see, so your feedback would be guesswork. Offer the flip |
+| Too narrow | one task or deliverable ("build the Q3 forecast") | A project, not a field; it runs out of topics. Offer the field underneath |
+| Too wide | "finance", "AI" | Ask which slice matters for their role and goal |
+
+**The flip.** Find the general field under the specific problem, and keep the specific problem as
+context:
+- **A person or team** → that side's field and what it needs, plus the general skill. "I struggle
+  to work with marketing" → "Marketing basics for finance: how marketing measures success, what it
+  needs from finance, and stakeholder management."
+- **A company process** → the discipline behind it. "How our month-end works" → "Month-end close
+  fundamentals: accruals, cut-off, reconciliations, review."
+- **A tool** → its toolkit and areas of work, not its clicks. "Learn Power BI" → "Power BI: data
+  modelling, Power Query and DAX." Teaching a widely used tool is fine; you know its concepts and
+  languages well, but not where every button sits in the current release, so never quiz on that.
+  A tool too new or niche for you to know → the ideas it's built on ("driver-based planning and
+  model design").
+- **A lookup list** → the judgement around it. "Excel shortcuts" → "Spreadsheet modelling:
+  structure, checks, choosing the right formula."
+- **One task** → the field. "Build the Q3 forecast" → "Forecasting: methods, drivers and
+  assumptions."
+
+Put the flip to them as a question, `➡️` the reworked area, with one line on why. Their original
+problem goes into `profile.context`, so questions from score 35 up are set in it.
+
+How hard to push:
+- **Lookup:** say it once, then go with their choice.
+- **Vague, context-bound, too narrow or too wide:** push back up to two more times, each time with
+  a sharper proposal. Ten minutes of onboarding on a badly cut area costs more than two extra
+  questions now. If they still want their own, go with it and name the limit once.
+- **Through the grill:** keep honing. As answers come in, tighten the area and say so in one line
+  ("Narrowing this to budgeting and forecasting; month-end is out").
+
+Then restate the area in one line: what they want to be able to do or understand, and where they'll
+use it. That line becomes `profile.goal`.
 
 ### The grill
 
@@ -76,24 +135,14 @@ IFRS 17?"; propose them and ask whether that's the right cut.
 
 The branches to cover. Not every area needs every one, and answers will open others:
 
-1. **Area and boundary.** What exactly is in, and what's next door but out? Restate the area as one
-   sentence, "In three months I want to be able to <do what> in <what setting>", and check it:
-   - narrow enough for 5 to 8 topics ("Accounting" is too wide; "IFRS 17 for a UK annuity writer"
-     is an area)
-   - about the subject, not one company's internals
-   - something to reason about, not a list to memorise
-   - covered by public knowledge, not changing faster than you can know it
-   If it fails a check, say which one and propose a better version. The agreed sentence becomes
-   `profile.goal`.
+1. **Boundary.** The area itself is settled above. Here: what exactly is in, and what's next door
+   but out?
 2. **Why now.** Exam, new job, a project, curiosity? This sets how practical the questions get.
 3. **Where they'll use it.** Role, industry, tools, who they explain it to. This is what makes the
-   scenario questions from score 35 up feel real. If they want to learn how their own company
-   does something, say plainly that you only know what's public or what they tell you. Topics
-   cover the subject; company detail only goes in if they describe it. Their own setup is fine as
-   scenery for questions, but steer topics away from company specifics (org charts, internal
-   systems): they go stale, and the subject underneath lasts.
-4. **Where they are now.** What they can already do and what confuses them. Probe with one or two
-   concrete questions instead of taking "intermediate" at face value.
+   scenario questions from score 35 up feel real. Their own setup is fine as scenery, but topics
+   stay on the field: company specifics go stale, and the field underneath lasts.
+4. **Where they are now.** What they can already do and what confuses them, in their words. Don't
+   take "intermediate" at face value; the check questions under Starting scores test it.
 5. **Depth versus breadth.** Fewer topics in depth, or a wide map?
 6. **Standards and versions.** Which jurisdiction, framework, dialect or version. (UK or US GAAP,
    Postgres or T-SQL, Python 3.12.)
@@ -104,28 +153,53 @@ The branches to cover. Not every area needs every one, and answers will open oth
 The grill is done when the frontier is empty: every branch visited, nothing silently assumed.
 Then summarise what you heard in five or six lines and ask the user to confirm before moving on.
 
+### Map the field (for yourself)
+
+Before proposing topics, sketch the field. Don't show the sketch; it shapes the list.
+
+1. **Anchor on a published structure**, not your own sense of "the main parts": a professional
+   syllabus or exam outline (ICAEW, ACCA, CIMA, CFA, IFoA), a standard's own structure, the
+   chapters of a recognised textbook, or a tool's official documentation areas. Search the web if
+   you can; otherwise use what you know and say which source you're working from.
+2. **List the core ideas and what each depends on**, so basics come before what's built on them.
+3. **Mark the key ideas** (the ones that change how everything else looks once they click) and the
+   **classic misconceptions** learners in this field hold. That's where the questions bite.
+4. **Cut to the user's goal and boundary**, and group what's left into topics.
+
 ### Topic list
 
 Propose 5 to 8 topics. Fewer topics come round more often, so each one gets drilled. Go up to 15
 only if the user asked for a wide map (branch 5). For each give:
 - a short **title** (2 to 6 words)
-- a **description** of two to four sentences that says what the topic covers in *this user's*
-  context and where its edges are. Later runs build questions from this text, so be specific.
+- a **description** of two to four sentences: what the topic covers in *this user's* context,
+  where its edges are, its key idea, and one or two misconceptions to test. Later runs build
+  questions from this text, so be specific.
 
-Topics should be roughly even in size, related to each other, and not overlapping. Present them as
-a numbered list and let the user add, cut, merge, split or reword. Repeat until they approve.
+**Depth check, before showing the list.** For each topic, draft one Foundation, one Applied and
+one Advanced question for yourself (see `reference/scoring.md`). No good Advanced question: the
+topic is too thin, merge it. A Foundation question that needs two ideas: too wide, split it. A
+question that could be scored against two topics: they overlap, redraw the line.
+
+Order the list basics first: new topics are asked in list order. Open with one line naming the
+source you anchored on. Present it as a numbered list and let the user add, cut, merge, split or
+reword. Repeat until they approve.
 
 ### Starting scores
 
-Only after the topic list is approved. Show the three bands from `reference/scoring.md` in plain
-words, then propose a starting score for each topic, with a one-line reason drawn from what the
-user told you. Word it so "yes" accepts, and let them change any of them.
+Only after the topic list is approved.
 
-- Base every score on the user's answers, mainly branch 4 (where they are now). Don't set one
-  number for every topic, and don't guess where they gave you nothing to go on: ask.
+**Check questions first.** One round of two or three short questions, each on a different topic,
+at Foundation level, answerable in a sentence or two. Pick the topics where you're least sure of
+their level. Say they're not scored. Don't teach; one line on each answer is enough.
+
+Then show the three bands from `reference/scoring.md` in plain words and propose a starting score
+for each topic, with a one-line reason. Word it so "yes" accepts, and let them change any of them.
+
+- Base every score on the check answers and what they told you in branch 4. Don't set one number
+  for every topic, and don't guess where they gave you nothing to go on: ask.
 - Most topics land at 15 to 20, lower if the topic is new to them. Starting high skips the basics,
   and the basics are where most of the learning is.
-- Above 20 only where they showed real knowledge in the grill. If they want higher, ask them to
+- Above 20 only where they showed real knowledge in the check questions or the grill. If they want higher, ask them to
   explain the core idea of that topic in a sentence or two. If they can't, suggest 20.
 - **Nothing above 50.** The script refuses it.
 
@@ -197,12 +271,13 @@ harder version; never force it.
 1. Ask a short grill, one or two rounds, about where they want to go next with this topic. Propose
    the harder topic: "Joins and their traps" might become "Query plans and join performance".
 2. Agree a title and a description, written the same way as in Part A.
-3. Starting score: default 30. The new topic has its own basics, and starting low means they get
-   asked. The cap is still 50.
+3. Starting score: ask one check question on the new topic, as in Part A. If they nail it, 30;
+   otherwise 15 to 20 (default 20). The new topic has its own basics, and starting low means they
+   get asked. The cap is still 50.
 4. Run:
 
 ```
-python3 <skill>/scripts/ht.py levelup --topic t03 --title "..." --description "..." [--score 30]
+python3 <skill>/scripts/ht.py levelup --topic t03 --title "..." --description "..." [--score 20]
 ```
 
 The old topic is archived with its final score and stays in the history. Then `package` and the

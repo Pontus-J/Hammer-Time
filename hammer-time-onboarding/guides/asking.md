@@ -8,8 +8,8 @@ One run is one Socratic dialogue about one topic. It ends with a score.
   topic it belongs to. If it fits no topic at all, run it unscored, say so, and suggest adding it
   as a topic in a review. An unscored run changes nothing, so it ends without `package` or the
   save message.
-- Otherwise use `SUGGESTED NEXT` from `ht.py status`. The rule behind it: least recently asked, then
-  lowest score, and never the topic from last time. Don't override it to pick something more
+- Otherwise use `SUGGESTED NEXT` from `ht.py status`. The rule behind it: topics never asked first, in
+  list order; then least recently asked, then lowest score; never the topic from last time. Don't override it to pick something more
   interesting.
 
 `status` ends with a brief for the suggested topic: its description, score and difficulty step,

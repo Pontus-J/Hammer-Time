@@ -36,7 +36,7 @@ RESULTS = {
 MIN_SCORE, MAX_SCORE = 0, 100
 APPLIED_FROM, ADVANCED_FROM = 35, 65  # band edges
 START_CAP = 50          # nobody self-estimates above this
-LEVELUP_DEFAULT = 30    # where a levelled-up topic starts unless the user says otherwise
+LEVELUP_DEFAULT = 20    # where a levelled-up topic starts unless the user says otherwise
 LEVELUP_THRESHOLD = 90  # at or above this, suggest a harder version of the topic
 MIN_TOPICS, MAX_TOPICS = 5, 15
 LOG_LIMIT = 20
@@ -210,7 +210,10 @@ def valid_start_score(n, label):
 
 
 def pick_topic(state):
-    """Least recently asked, then lowest score, never the topic asked last time."""
+    """Least recently asked, then lowest score, never the topic asked last time.
+
+    Topics never asked go first, in list order: onboarding orders the list basics first.
+    """
     topics = list(state["topics"])
     log = state.get("log") or []
     # Position of each topic's latest answer in the log. A topic missing from the log was last
@@ -218,7 +221,9 @@ def pick_topic(state):
     recent = {e["topic"]: i for i, e in enumerate(log)}
     last = log[-1]["topic"] if log else None
     pool = [t for t in topics if t["id"] != last] or topics
-    pool.sort(key=lambda t: (recent.get(t["id"], -1), t["last_asked"] or "", t["score"], t["id"]))
+    order = {t["id"]: i for i, t in enumerate(topics)}
+    pool.sort(key=lambda t: (recent.get(t["id"], -1), t["last_asked"] or "",
+                             order[t["id"]] if not t["times_asked"] else t["score"], t["id"]))
     return pool[0]
 
 
@@ -522,6 +527,16 @@ def cmd_review(args):
     never = [t for t in state["topics"] if t["times_asked"] == 0]
     if never:
         print("NEVER ASKED: " + ", ".join("%s %s" % (t["id"], t["title"]) for t in never))
+    # Topic-shape signals: the same result on every one of a topic's last few answers.
+    full = [t for t in state["topics"] if len(t.get("recent", [])) == RECENT_LIMIT]
+    easy = [t for t in full if all(e["result"] == "first_try" for e in t["recent"])]
+    stuck = [t for t in full if all(e["result"] in ("partial", "missed") for e in t["recent"])]
+    if easy:
+        print("ALWAYS FIRST TRY (last %d): " % RECENT_LIMIT
+              + ", ".join("%s %s (%d)" % (t["id"], t["title"], t["score"]) for t in easy))
+    if stuck:
+        print("STUCK (last %d partial or missed): " % RECENT_LIMIT
+              + ", ".join("%s %s (%d)" % (t["id"], t["title"], t["score"]) for t in stuck))
 
 
 def cmd_mark_review(args):
