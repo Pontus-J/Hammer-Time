@@ -18,8 +18,9 @@ skill made from it (`hammer-time-sql`, `hammer-time-accounting`). The only diffe
    conversation; the script keeps the books.
 2. **Never retype or rewrite any other file in this folder.** The package is a copy of the
    installed files plus the script's changes. That is what stops the skill drifting over months.
-3. **Every run that changes state ends with `package` and the save message** from
-   `guides/updating.md`. If the user doesn't save, the run didn't happen.
+3. **Every run that changes state ends with `package`, with no flags, and the save message** from
+   `guides/updating.md`, including the save block `package` prints, word for word. If the user
+   doesn't save, the run didn't happen.
 4. One area per skill. If the user wants a second area, they run `hammer-time-onboarding` again.
 
 ## Start of every run
@@ -59,12 +60,14 @@ The guides, `reference/scoring.md`, `scripts/ht.py` and `NOTICE.md` never change
 
 ## Platform notes
 
-- **claude.ai**: the installed skill is read-only. `ht.py` copies it to a work folder, changes the
-  copy, and `package` writes `<skill-name>.skill` to `/mnt/user-data/outputs/`. Give the user that
-  file so they can save it. The work copy stays for the rest of the chat, so a second question
-  builds on the first.
-- **Claude Code**: use `package --install`. That writes the new version straight over the
-  installed one, wherever it is installed, and nothing needs saving by hand.
+- `package` picks how a run is saved, and the `SAVING` line from `status` says which. Only a
+  local Claude Code install on the user's own Mac or Windows computer is updated in place.
+  Everywhere else, claude.ai and cloud sessions included, it writes `<skill-name>.skill` and the
+  user must save it. Don't second-guess it: a cloud session can look like Claude Code and still
+  lose every change when it ends.
+- `ht.py` never changes the installed skill directly. It copies it to a work folder and changes
+  the copy. On claude.ai the copy stays for the rest of the chat, so a second question builds on
+  the first.
 - If you can't run code at all, the skill can't work. Tell the user exactly this and stop:
   "Hammer Time needs code execution. On claude.ai go to **Settings > Capabilities**, turn on
   **Code execution and file creation**, then start a new chat and type **hammer time** again."

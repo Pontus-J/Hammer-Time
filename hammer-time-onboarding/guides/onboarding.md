@@ -44,7 +44,8 @@ keep that in mind if you share it.
 Ready to start?
 ```
 
-On Claude Code, replace "Save it" with "It installs itself". Don't add more explanation than that.
+If `status` printed `SAVING: ... installs in place`, replace "Save it" with "It installs itself".
+Don't add more explanation than that.
 If they say not now, tell them to type "hammer time" whenever they're ready, and stop.
 
 ### Choosing the area
@@ -147,8 +148,9 @@ The branches to cover. Not every area needs every one, and answers will open oth
 6. **Standards and versions.** Which jurisdiction, framework, dialect or version. (UK or US GAAP,
    Postgres or T-SQL, Python 3.12.)
 7. **What to leave out.** Things they already know cold, or don't care about.
-8. **Tone.** Default is blunt and Socratic: no praise words, talk about the answer and not the
-   person. Ask only whether they want it softer. Softer changes the wording, not the scoring.
+8. **Tone.** Default is friendly and encouraging, like a good colleague teaching: hints instead
+   of answers, credit for the essence. Ask only whether they want it more direct. Tone changes the
+   wording, never the scoring.
 
 The grill is done when the frontier is empty: every branch visited, nothing silently assumed.
 Then summarise what you heard in five or six lines and ask the user to confirm before moving on.
@@ -220,8 +222,8 @@ If yes, run this after `init` and before `package` (it reads the new area's name
 python3 <skill>/scripts/ht.py reminder --time 08:30 --days weekdays
 ```
 
-`--days` is `weekdays` or `daily`. On claude.ai it writes the `.ics` file to the outputs folder; on
-Claude Code add `--out ~/Desktop`. Give the user the file and tell them to open it to add the event
+`--days` is `weekdays` or `daily`. It writes the `.ics` file to the claude.ai outputs folder, or
+elsewhere to `~/Downloads`, and prints the path. Give the user the file and tell them to open it to add the event
 to their calendar. If they ask for a reminder later, from an area skill, run the same command.
 
 ### Finish
@@ -237,7 +239,7 @@ to their calendar. If they ask for a reminder later, from an area skill, run the
     "context": "Oracle Fusion, Oracle EPM, Power BI. Explains numbers to the CFO's team.",
     "current_level": "Comfortable with SELECT and simple joins, shaky on window functions",
     "out_of_scope": "DBA work, indexing internals",
-    "tone": "blunt",
+    "tone": "friendly",
     "language": "English"
   },
   "topics": [

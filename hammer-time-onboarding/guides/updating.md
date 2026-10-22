@@ -18,15 +18,24 @@ record the next answer properly. Don't try to reverse it.
 
 ## 2. Package
 
-- **claude.ai**: `python3 <skill>/scripts/ht.py package`. It writes
-  `/mnt/user-data/outputs/<skill-name>.skill`. Present that file to the user.
-- **Claude Code**: `python3 <skill>/scripts/ht.py package --install`. It replaces the installed
-  skill in place. Nothing more for the user to do.
+```
+python3 <skill>/scripts/ht.py package
+```
+
+Always exactly this, with no flags, on every platform. The script decides how the run is saved:
+
+- `INSTALLED`: a local Claude Code install on the user's own computer, updated in place. Nothing
+  for the user to save.
+- `SAVE REQUIRED`: everywhere else, claude.ai and cloud sessions included. It wrote a `.skill`
+  file and printed what to do: give the user the file, and show its save block word for word.
+
+Never pass `--install` or `--out` during a run, and never decide for yourself that a run is saved.
+A session that can write to the skill folder can still be thrown away when the chat ends, and then
+the scores are lost without anyone noticing.
 
 ## 3. The save message
 
-Show the scores and the save step together, in this order, every time. Keep the wording close to
-this. On Claude Code, drop the save block and say it's installed.
+Show the scores and the save step together, in this order, every time:
 
 ```
 **<Topic title>: <old> → <new>** (<band>)
@@ -36,14 +45,11 @@ this. On Claude Code, drop the save block and say it's installed.
 |---|---|---|
 | ... | ... | ... |
 
----
-
-## 💾 Save the skill now
-
-Click **Save skill** on the file above. It replaces your current `<skill-name>`.
-
-**If you skip this, today's score is gone.** The next run starts from your old scores.
+<the save block `package` printed, from the --- line to the end, word for word>
 ```
+
+If `package` printed `INSTALLED`, put one line in place of the save block: "Saved: the skill is
+updated in place." Never shorten or skip the save block, and never put anything before it.
 
 If `ht.py` printed `LEVEL UP`, add one line after the table offering a harder version of that topic
 next time (`guides/onboarding.md`, part B). Don't start it in this run.

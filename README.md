@@ -9,8 +9,9 @@ A Claude skill that hammers in knowledge about one area, one Socratic question a
 2. On claude.ai, go to **Settings → Capabilities → Skills** and upload the file.
 3. Start a new chat and type **hammer time**. It explains the rest.
 
-You run it, it asks you one question about one topic, pushes back until you either get it or clearly
-don't, and scores you. Every topic has a score from 0 to 100, and the score decides how hard the
+You run it, it asks you one question about one topic, nudges you with hints rather than answers
+until you work it out, explains whatever you didn't get, and scores you on understanding, not
+wording. Every topic has a score from 0 to 100, and the score decides how hard the
 next question is:
 
 | score | band | questions |
@@ -57,7 +58,9 @@ guides, and the `.skill` file has them packed in the right shape. If code execut
 skill tells you how to turn it on.
 
 **Claude Code**: copy the `hammer-time-onboarding` folder into `~/.claude/skills/` and type
-"hammer time". Runs update the installed skill directly, so there's nothing to save by hand.
+"hammer time". On your own Mac or Windows computer, runs update the installed skill directly, so
+there's nothing to save by hand. Anywhere else (cloud sessions, skills synced from claude.ai) every
+run ends with a `.skill` file to save, because changes made there are thrown away.
 
 **Status:** in daily use on claude.ai, where **Save skill** keeps the whole folder and the scores
 carry over, and tested end to end in Claude Code.

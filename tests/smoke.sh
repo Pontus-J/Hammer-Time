@@ -7,6 +7,9 @@ T="$(mktemp -d)"
 trap 'chmod -R u+w "$T"; rm -rf "$T"' EXIT
 # Keep the work copies inside $T, away from any real session's.
 export TMPDIR="$T/tmp"; mkdir -p "$TMPDIR"
+# Files for the user default to ~/Downloads off claude.ai; keep them in $T too.
+export HOME="$T/home"; mkdir -p "$HOME/Downloads"
+unset CLAUDE_CODE_REMOTE
 fail() { echo "FAIL: $*"; exit 1; }
 ok() { echo "ok   $*"; }
 
@@ -144,8 +147,14 @@ python3 "$H" edit-topic --topic t04 --title "Renamed" >/dev/null
 python3 "$H" status | grep -q "| t04 | Renamed | 35 |" || fail "edit-topic should rename and keep the score"
 ok "edit-topic renames and keeps the score"
 python3 "$H" status | grep -q "UNPACKAGED CHANGES" || fail "status should flag unpackaged changes"
-python3 "$H" package 2>/dev/null && fail "plain package off claude.ai should be refused"
-ok "status flags unpackaged changes; plain package refused off claude.ai"
+python3 "$H" status | grep -q "^SAVING: .*must save.*read-only" || fail "status should say a read-only install needs saving"
+python3 "$H" package --install > "$T/pkg" || fail "package --install on a read-only install should export"
+grep -q "^NOT INSTALLED: the skills folder is read-only" "$T/pkg" || fail "should say why it didn't install: $(head -3 "$T/pkg")"
+grep -q "^SAVE REQUIRED" "$T/pkg" || fail "should say saving is required"
+grep -q "^## 💾 Save the skill now" "$T/pkg" || fail "should print the save block"
+[ -f "$HOME/Downloads/hammer-time-sql.skill" ] || fail "should write the file to ~/Downloads"
+ok "status flags unpackaged changes; a read-only install exports with the save block"
+python3 "$H" score --topic t04 --result partial --note "after export" >/dev/null
 
 python3 "$H" review | grep -q "Hard t02 | 20 | Foundation | new" || fail "review should mark the level-up topic as new"
 python3 "$H" review | grep -q "t01 | Topic 1 | 0 | Foundation | -10" || fail "review delta after several scores"
@@ -188,10 +197,12 @@ rm -rf "$TMPDIR/hammer-time-work"
 mkdir -p "$T/cc"
 cp -R "$T/out2/hammer-time-sql" "$T/cc/"
 H="$T/cc/hammer-time-sql/scripts/ht.py"
+[ "$(uname)" = Darwin ] || fail "section 3 needs macOS: local installs are only trusted on macOS and Windows"
+python3 "$H" status | grep -q "^SAVING: .*installs in place" || fail "status should say a local install updates in place"
 python3 "$H" score --topic t01 --result first_try --note "n" >/dev/null
-python3 "$H" package --install >/dev/null
+python3 "$H" package | grep -q "^INSTALLED: " || fail "plain package should install a local copy"
 python3 "$H" status | grep -q "| t01 | Topic 1 | 5 |" || fail "install should update in place"
-ok "Claude Code --install (no path) updates the skill in place"
+ok "Claude Code: plain package updates a local skill in place"
 
 python3 "$H" package --out "$T/export" >/dev/null || fail "export of an unchanged skill should work"
 (cd "$T/export" && unzip -q hammer-time-sql.skill)
@@ -201,5 +212,26 @@ EOF
 [ -f "$T/cc/hammer-time-sql/state.json" ] || fail "export must not touch the installed skill"
 python3 "$H" package 2>/dev/null && fail "plain package with no changes should still be refused"
 ok "unchanged skill exports with --out and stays installed"
+
+# 4. Places where installing in place would silently lose the run ------------------
+cloud_case() {  # cloud_case <label> <expected reason>; $H set, run with any env already exported
+  rm -rf "$TMPDIR/hammer-time-work" "$HOME/Downloads/hammer-time-sql.skill"
+  before="$(python3 "$H" status | grep "| t01 |")"
+  python3 "$H" status | grep -q "^SAVING: .*must save" || fail "$1: status should say the user must save"
+  python3 "$H" score --topic t01 --result first_try --note "cloud" >/dev/null
+  python3 "$H" package --install > "$T/pkg" || fail "$1: package --install should export, not fail"
+  grep -q "^NOT INSTALLED: $2" "$T/pkg" || fail "$1: should refuse to install: $(cat "$T/pkg")"
+  grep -q "^## 💾 Save the skill now" "$T/pkg" || fail "$1: should print the save block"
+  [ -f "$HOME/Downloads/hammer-time-sql.skill" ] || fail "$1: should write the .skill file"
+  [ "$(python3 "$H" status | grep "| t01 |")" != "$before" ] || fail "$1: work copy should hold the new score"
+  rm -rf "$TMPDIR/hammer-time-work"
+  [ "$(python3 "$H" status | grep "| t01 |")" = "$before" ] || fail "$1: installed skill must not change"
+  ok "$1: --install refused, file and save block instead"
+}
+(export CLAUDE_CODE_REMOTE=true; cloud_case "cloud session" "this is a cloud session")
+mkdir -p "$T/home/.claude/skills/synced/bucket"
+cp -R "$T/cc/hammer-time-sql" "$T/home/.claude/skills/synced/bucket/"
+H="$T/home/.claude/skills/synced/bucket/hammer-time-sql/scripts/ht.py"
+cloud_case "skill synced from claude.ai" "this skill is synced"
 
 echo "all passed"

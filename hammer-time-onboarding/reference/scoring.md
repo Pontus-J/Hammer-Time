@@ -34,10 +34,13 @@ Flat across all bands. A clear miss costs as much as a clean answer earns.
 
 | result | meaning | change |
 |---|---|---|
-| `first_try` | every key point with its reasoning, no help (a plain "why?" isn't help) | +5 |
-| `guided` | every key point, with help, within three exchanges | +2 |
-| `partial` | some key points after three exchanges | 0 |
+| `first_try` | the essence of every key point, in any words, without hints (a plain "why?" isn't a hint) | +5 |
+| `guided` | every key point, with hints, within three hints | +2 |
+| `partial` | some key points after three hints | 0 |
 | `missed` | none of them, or they gave up | -5 |
+
+Judge substance, not wording: a short answer that gets the essence is a full answer. Between two
+results, pick the higher one.
 
 Scores stay between 0 and 100. `ht.py` applies this; you only pick the result.
 

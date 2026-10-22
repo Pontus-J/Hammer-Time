@@ -160,6 +160,41 @@ def ensure_work_copy():
     return wd
 
 
+def default_out_dir():
+    """Where files for the user go when no folder is given."""
+    if os.path.isdir(CLAUDE_AI_OUTPUTS):
+        return CLAUDE_AI_OUTPUTS
+    downloads = os.path.expanduser("~/Downloads")
+    return downloads if os.path.isdir(downloads) else os.getcwd()
+
+
+def install_blocker(dest_root):
+    """Why installing in place would lose the scores, or None for a local install that keeps them.
+
+    Anything not clearly a local Claude Code install gets a .skill file to save instead. A cloud
+    sandbox can look writable and still be thrown away when the chat ends, losing the run silently.
+    """
+    if os.path.isdir(CLAUDE_AI_OUTPUTS):
+        return "this is claude.ai, where the installed skill is read-only"
+    if os.environ.get("CLAUDE_CODE_REMOTE", "").lower() not in ("", "0", "false"):
+        return "this is a cloud session, and its files are thrown away when it ends"
+    if sys.platform not in ("darwin", "win32"):
+        return "this looks like a cloud sandbox, and its files may be thrown away when it ends"
+    if "synced" in os.path.normpath(SKILL_DIR).split(os.sep):
+        return "this skill is synced from claude.ai, which would overwrite a local change"
+    if not os.access(dest_root, os.W_OK):
+        return "the skills folder is read-only"
+    return None
+
+
+def print_saving():
+    blocker = install_blocker(os.path.dirname(SKILL_DIR))
+    if blocker is None:
+        print("SAVING: `package` installs in place. Nothing for the user to save.")
+    else:
+        print("SAVING: `package` writes a .skill file the user must save after every run (%s)." % blocker)
+
+
 def begin_change():
     """Check there is state to change, then return the work copy and its state."""
     load_state()  # dies before any copying if this copy was never onboarded
@@ -268,9 +303,11 @@ def cmd_status(args):
     if state is None:
         print("MODE: onboarding")
         print("This copy has no state. Follow guides/onboarding.md.")
+        print_saving()
         return
     print("MODE: active")
     print("AREA: %s (skill name %s)" % (state["area"]["title"], state["skill_name"]))
+    print_saving()
     wd = active_dir()
     if wd != SKILL_DIR and not os.path.isfile(packaged_marker(wd)):
         print("UNPACKAGED CHANGES: an earlier run changed state but never ran `package`. "
@@ -358,7 +395,7 @@ def cmd_init(args):
     print()
     print(table(state))
     print()
-    print("NEXT: run `package`, then hand the file to the user to save.")
+    print("NEXT: run `package` and follow what it prints.")
 
 
 def rewrite_frontmatter(d, skill_name, area_title):
@@ -417,7 +454,8 @@ def cmd_score(args):
     print()
     print(table(state))
     print()
-    print("NEXT: run `package`, then show the save message from guides/updating.md.")
+    print("NEXT: run `package` now. The run isn't finished until it prints INSTALLED, or the user "
+          "has the file and its save block.")
 
 
 def cmd_levelup(args):
@@ -551,9 +589,7 @@ def cmd_reminder(args):
     state = load_state()
     if not re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", args.time):
         die("--time must be HH:MM in 24-hour time, e.g. 08:30")
-    out_dir = args.out or (CLAUDE_AI_OUTPUTS if os.path.isdir(CLAUDE_AI_OUTPUTS) else None)
-    if out_dir is None:
-        die("not on claude.ai; pass `--out <folder>` for the .ics file")
+    out_dir = args.out or default_out_dir()
     words = state["skill_name"][len("hammer-time-"):].replace("-", " ")
     start = dt.date.today() + dt.timedelta(days=1)
     if args.days == "weekdays":
@@ -615,24 +651,26 @@ def cmd_package(args):
         die("no state.json in the work copy, so onboarding did not finish. Fix the spec and rerun `init`")
     name = read_frontmatter_name(wd)
 
-    if args.install:
-        dest_root = os.path.abspath(os.path.expanduser(args.install))
-        dest = os.path.join(dest_root, name)
-        if os.path.exists(dest):
-            rmtree(dest)
-        shutil.copytree(wd, dest)
-        rmtree(wd)
-        clear_redirect()
-        if os.path.isfile(packaged_marker(wd)):
-            os.remove(packaged_marker(wd))
-        print("INSTALLED: %s" % dest)
-        return
+    if not args.out:
+        dest_root = os.path.abspath(os.path.expanduser(args.install or os.path.dirname(SKILL_DIR)))
+        blocker = install_blocker(dest_root)
+        if blocker is None:
+            dest = os.path.join(dest_root, name)
+            if os.path.exists(dest):
+                rmtree(dest)
+            shutil.copytree(wd, dest)
+            rmtree(wd)
+            clear_redirect()
+            if os.path.isfile(packaged_marker(wd)):
+                os.remove(packaged_marker(wd))
+            print("INSTALLED: %s" % dest)
+            print("Saved in place. Tell the user it's installed; there is nothing for them to save.")
+            return
+        if args.install is not None:
+            print("NOT INSTALLED: %s. Writing a .skill file to save instead." % blocker)
+            print()
 
-    out_dir = args.out or (CLAUDE_AI_OUTPUTS if os.path.isdir(CLAUDE_AI_OUTPUTS) else None)
-    if out_dir is None:
-        die("not on claude.ai, so there is no Save button. In Claude Code use `package --install`; "
-            "to get a .skill file anyway, pass `--out <folder>`")
-    out = write_skill_zip(wd, name, out_dir)
+    out = write_skill_zip(wd, name, args.out or default_out_dir())
     if os.path.isfile(redirect_path()):
         # Fresh from onboarding: put the template back, so it can onboard another area.
         rmtree(wd)
@@ -641,8 +679,32 @@ def cmd_package(args):
         # Keep the work copy, so "one more" in the same chat builds on this run. The installed
         # skill doesn't change until the user saves the file.
         open(packaged_marker(wd), "w").close()
+    print_save_required(out, name)
+
+
+def print_save_required(out, name):
     print("PACKAGED: %s" % out)
-    print("The user must save this file as their skill, or today's scores are lost.")
+    print()
+    print("SAVE REQUIRED. The run is not finished until the user has this file and the save block below.")
+    if os.path.dirname(out) == CLAUDE_AI_OUTPUTS:
+        print("1. Present the file to the user.")
+        how = "Click **Save skill** on the file above. It replaces your current `%s`." % name
+    else:
+        print("1. Send the user the file with your tool for sharing files. If you have none, give "
+              "them the full path above.")
+        how = ("Download `%s.skill` and upload it on claude.ai under **Settings > Capabilities > "
+               "Skills**, replacing your current `%s`. In Claude Code on your own computer, unzip "
+               "it into `~/.claude/skills/` instead." % (name, name))
+    print("2. Show this block word for word, after the score table and before \"One more?\" or "
+          "anything else:")
+    print()
+    print("---")
+    print()
+    print("## 💾 Save the skill now")
+    print()
+    print(how)
+    print()
+    print("**If you skip this, today's score is gone.** The next run starts from your old scores.")
 
 
 def main():
@@ -701,10 +763,12 @@ def main():
     s = sub.add_parser("package", help="turn this session's changes into a .skill file, or install locally")
     g = s.add_mutually_exclusive_group()
     g.add_argument("--out", help="folder for the .skill file (default: claude.ai outputs)")
-    g.add_argument("--install", nargs="?", const=os.path.dirname(SKILL_DIR),
-                   help="Claude Code: install in place. Defaults to the skills folder this skill is in")
+    g.add_argument("--install", nargs="?", const="",
+                   help="install into this skills folder; refused unless it's a local install")
     s.set_defaults(fn=cmd_package)
 
+    if hasattr(sys.stdout, "reconfigure"):  # the save block has non-ASCII; Windows consoles choke
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     args = p.parse_args()
     args.fn(args)
 
