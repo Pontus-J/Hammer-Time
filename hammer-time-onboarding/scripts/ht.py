@@ -108,7 +108,7 @@ def read_frontmatter_name(skill_dir):
     m = re.search(r"^name:\s*(\S+)\s*$", text, re.M)
     if not m:
         die("SKILL.md has no name in its frontmatter")
-    return m.group(1)
+    return m.group(1).strip("\"'")  # claude.ai can hand back the name quoted
 
 
 def work_dir_for(name):

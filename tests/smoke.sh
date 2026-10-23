@@ -213,6 +213,16 @@ EOF
 python3 "$H" package 2>/dev/null && fail "plain package with no changes should still be refused"
 ok "unchanged skill exports with --out and stays installed"
 
+mkdir -p "$T/quoted"
+cp -R "$T/cc/hammer-time-sql" "$T/quoted/"
+sed -i.bak 's/^name: hammer-time-sql$/name: "hammer-time-sql"/' "$T/quoted/hammer-time-sql/SKILL.md"
+rm "$T/quoted/hammer-time-sql/SKILL.md.bak"
+grep -q '^name: "hammer-time-sql"$' "$T/quoted/hammer-time-sql/SKILL.md" || fail "test setup: name should be quoted"
+python3 "$T/quoted/hammer-time-sql/scripts/ht.py" package --out "$T/qout" >/dev/null
+[ -f "$T/qout/hammer-time-sql.skill" ] || fail "a quoted name should package as hammer-time-sql.skill: $(ls "$T/qout")"
+unzip -l "$T/qout/hammer-time-sql.skill" | grep -q ' hammer-time-sql/SKILL.md$' || fail "zip folder should be unquoted"
+ok "a quoted name in SKILL.md (as claude.ai hands it back) packages cleanly"
+
 # 4. Places where installing in place would silently lose the run ------------------
 cloud_case() {  # cloud_case <label> <expected reason>; $H set, run with any env already exported
   rm -rf "$TMPDIR/hammer-time-work" "$HOME/Downloads/hammer-time-sql.skill"
