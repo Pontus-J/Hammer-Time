@@ -24,14 +24,14 @@ Right first time is +5. A clear miss is -5. Past 90, it offers you a harder vers
 
 ## How it works
 
-1. **Onboarding.** It grills you on what you want to learn, why, where you'll use it and where you
-   are now, in numbered rounds with a suggested answer for each: reply `Q1 yes` to agree, or say
-   more. Usually about 10 minutes. It checks your subject suits the drill (a field with judgement
-   in it, not your company's internals or a lookup list) and offers a better version if it
-   doesn't. Then it proposes 5 to 8 topics, built from a published syllabus
-   or similar where one exists, for you to edit. Two or three quick unscored check questions set
-   a starting score for each (usually 15 to 20, 50 at most).
-   It can also give you a daily calendar reminder.
+1. **Onboarding.** A short welcome first, then setup in four marked steps, usually about 10
+   minutes. **Your subject:** it checks the subject suits the drill (a field with judgement in
+   it, not your company's internals or a lookup list) and offers a better version if it doesn't.
+   **About you:** why you want it, where you'll use it and where you are now, in short numbered
+   rounds of up to three questions with a suggested answer for each: reply `Q1 yes` to agree, or
+   say more. **Topics:** 5 to 8, built from a published syllabus or similar where one exists, for
+   you to edit. **Starting level:** two or three unscored warm-up questions set a starting score
+   for each (usually 15 to 20, 50 at most). It can also give you a daily calendar reminder.
 2. **It hands you a new skill**, e.g. `hammer-time-sql`. Save it. Your onboarding template stays as
    it was, so you can onboard another area later.
 3. **Every day after that**, say "hammer time sql". One question, a short back and forth, a score,
@@ -41,6 +41,10 @@ Right first time is +5. A clear miss is -5. Past 90, it offers you a harder vers
    you up and whether to change topics.
 
 One area per skill. Keep the topics in an area related to each other.
+
+The skill carries its own manual, `hammer-time-onboarding/README.md`, for people who get the
+`.skill` file without this page. Ask "how does Hammer Time work?" or "what have I set up?" in any
+Hammer Time skill and Claude answers from it, using your own topics and scores.
 
 ## Why the script
 

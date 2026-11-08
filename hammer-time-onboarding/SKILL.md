@@ -1,6 +1,6 @@
 ---
 name: hammer-time-onboarding
-description: "Hammer Time: type \"hammer time\" to start. A Socratic drill that hammers one subject in, one question a day, scoring each topic 0-100 and re-saving itself with the new scores. Use when the user says \"hammer time\", \"start hammer time\", runs /hammer-time or /hammer-time-onboarding, or asks to set up a new Hammer Time subject. Do not use for ordinary study questions."
+description: "Hammer Time: type \"hammer time\" to start. A Socratic drill that hammers one subject in, one question a day, scoring each topic 0-100 and re-saving itself with the new scores. Use when the user says \"hammer time\", \"start hammer time\", runs /hammer-time or /hammer-time-onboarding, asks to set up a new Hammer Time subject, or asks what Hammer Time is or how it works. Do not use for ordinary study questions."
 ---
 
 # Hammer Time
@@ -37,8 +37,9 @@ Then pick the mode:
 
 | status says | user asked for | mode | read |
 |---|---|---|---|
-| `MODE: onboarding` | anything | Onboarding | `guides/onboarding.md` (part A) |
-| `MODE: active` | a question, or nothing specific | Ask | `guides/asking.md`, then `guides/updating.md` |
+| either | what Hammer Time is, how it works, what they've set up, or how to do something with it | Explain | `README.md`, then "Explaining" below |
+| `MODE: onboarding` | anything else | Onboarding | `guides/onboarding.md` (part A) |
+| `MODE: active` | today's question, or nothing specific | Ask | `guides/asking.md`, then `guides/updating.md` |
 | `MODE: active` | a progress review, or to change topics | Review | `guides/review.md` |
 | `MODE: active` | a harder version of a topic | Level up | `guides/onboarding.md` (part B) |
 | `MODE: active` | a daily reminder | Reminder | `guides/onboarding.md` (Daily reminder) |
@@ -47,11 +48,27 @@ Read the guide for the mode before saying anything to the user. Read `reference/
 asking or scoring a question. Don't load guides you don't need.
 
 If the user typed plain "hammer time" and you can see more than one `hammer-time-*` skill, ask
-which area they mean before doing anything.
+which area they mean before doing anything. Not for Explain: answer, and name the areas you see.
+
+## Explaining
+
+`README.md` is the user's manual, written for them. When they ask what Hammer Time is, how it
+works, what they've set up or how to do something, answer from its "The big picture" section.
+
+- Answer what they asked, in a few lines, in their language. Walk through the whole picture only
+  if they ask for it or say they're lost.
+- Make it about their setup. With `MODE: active`, use the area, topics, scores and `SAVING` line
+  from `status`. With `MODE: onboarding`, they haven't set up a subject yet.
+- Explaining changes nothing: no `ht.py` command other than `status`, no `package`, no save
+  message.
+- End with the next step in one line: today's question in an area skill, or starting setup in the
+  template.
+- If they ask in the middle of setup or a question, answer, then carry on exactly where you were.
 
 ## Where things are
 
-The guides, `reference/scoring.md`, `scripts/ht.py` and `NOTICE.md` never change. Two files do:
+`README.md`, the guides, `reference/scoring.md`, `scripts/ht.py` and `NOTICE.md` never change.
+Two files do:
 
 | file | what | changes |
 |---|---|---|

@@ -7,50 +7,46 @@ harder once its score passes 90.
 
 ## Part A: new area
 
-### Before the first question
+The user may know nothing about this skill beyond its name, and setup decides whether they come
+back tomorrow. Keep it light: short rounds, plain words, one thing at a time. "Grill",
+"frontier" and "decision tree" below are words for you; never use them with the user.
 
-The user may know nothing about this skill beyond its name. This message is their whole manual.
-Send it close to word for word, then **stop and wait**. Start round 1 only when they say they're ready.
+### Welcome
+
+Send the `## Welcome` section of `README.md` close to word for word, from its bold title to
+"**Ready?**", then **stop and wait**.
+
+- If `status` printed `SAVING: ... installs in place`, replace step 3 with "**Your scores save
+  themselves.** Nothing to do after each day."
+- If they already have another `hammer-time-*` skill, or say they've used Hammer Time before, skip
+  the welcome. Say in one line that you're setting up a new subject and go straight to step 1.
+- **yes**: start step 1.
+- **tell me more**, or a question: answer from "The big picture" in `README.md` (see "Explaining"
+  in `SKILL.md`), then ask again whether they're ready.
+- **not now**: tell them to type **hammer time** whenever they're ready, and stop.
+
+### Four steps
+
+Setup has four steps, then saving. Open the first message of each step with its marker on a line
+of its own, so they always know where they are and how much is left:
+
+- `**Step 1 of 4 · Your subject**`
+- `**Step 2 of 4 · About you**`
+- `**Step 3 of 4 · Topics**`
+- `**Step 4 of 4 · Starting level**`
+
+### Step 1: Your subject
+
+Settle this before anything else. Everything later is built on it.
+
+Open with one plain question: no number, no suggested answer.
 
 ```
-**Welcome to Hammer Time.** It drills one subject into you, one question a day. Each topic gets a
-score from 0 to 100, and the questions get harder as your score rises.
+**Step 1 of 4 · Your subject**
 
-**First, a short setup (about 10 minutes, longer if you go deep).** I'll ask what you want to
-learn and why, then propose topics and starting scores.
-
-**How to answer:** questions come in numbered rounds, each with my suggested answer (➡️).
-- Agree: reply with the number and "yes" (`Q1 yes`).
-- Disagree or unsure: say so in your own words. The more detail you give, the better it fits you.
-
-**What I know:** what's public, what you tell me, and what you ask me to look up. I don't know the
-internals of any company, yours included (its systems, processes or numbers), so questions stay
-with the subject itself plus whatever you describe to me.
-
-**Picking a subject:** it works best on a field you're new to or about to need, where the hard
-part is the judgement you'd normally pick up over years from experience and your manager.
-- Great: "FP&A as a new joiner: budgeting, variances, business partnering", "Accounting basics
-  for non-accountants", "Power BI for a team rolling it out: data modelling and DAX"
-- Works, but wastes it: things you could look up, like Excel shortcuts. Right or wrong, nothing
-  to reason about.
-- Won't work as is: anything that hangs on your company's people or systems, like "working with
-  my tricky marketing team". I'll help turn it into one that does: marketing basics for finance,
-  plus stakeholder management.
-
-**At the end** you get a new skill named after your subject. Save it, and from then on start each
-day's question by typing its name. What you tell me about your role and goals is stored in it, so
-keep that in mind if you share it.
-
-Ready to start?
+What do you want to learn, and what's it for? A sentence or two is plenty, e.g. "FP&A basics, I've
+just joined the team" or "Power BI, we're rolling it out next quarter".
 ```
-
-If `status` printed `SAVING: ... installs in place`, replace "Save it" with "It installs itself".
-Don't add more explanation than that.
-If they say not now, tell them to type "hammer time" whenever they're ready, and stop.
-
-### Choosing the area
-
-Settle this in round 1, before anything else. Everything later is built on it.
 
 A good area has all four:
 - **Judgement, not lookup.** Answers have a why, and a half-right answer can be corrected. That's
@@ -68,7 +64,7 @@ Sort what they asked for:
 |---|---|---|
 | Great | FP&A as a new joiner, controlling, accounting basics for a non-accountant, business partnering, Power BI data modelling | Go ahead |
 | Lookup | shortcuts, formula syntax, acronyms, a list of rules | Say it works but mostly tests recall, and offer the judgement version. Go with their choice |
-| Context-bound | a particular team or person, how my company does X, our internal system | Say why: the answers sit in people, history and systems you can't see, so your feedback would be guesswork. Offer the flip |
+| Context-bound | a particular team or person, how my company does X, our internal system | Say why: you don't know the internals of any company, theirs included (its people, systems, processes or numbers), so your feedback would be guesswork. Offer the flip |
 | Too narrow | one task or deliverable ("build the Q3 forecast") | A project, not a field; it runs out of topics. Offer the field underneath |
 | Too wide | "finance", "AI" | Ask which slice matters for their role and goal |
 
@@ -97,23 +93,30 @@ How hard to push:
 - **Vague, context-bound, too narrow or too wide:** push back up to two more times, each time with
   a sharper proposal. Ten minutes of onboarding on a badly cut area costs more than two extra
   questions now. If they still want their own, go with it and name the limit once.
-- **Through the grill:** keep honing. As answers come in, tighten the area and say so in one line
+- **Through step 2:** keep honing. As answers come in, tighten the area and say so in one line
   ("Narrowing this to budgeting and forecasting; month-end is out").
 
 Then restate the area in one line: what they want to be able to do or understand, and where they'll
-use it. That line becomes `profile.goal`.
+use it. Ask whether that's it. That line becomes `profile.goal`.
 
-### The grill
+### Step 2: About you (the grill)
 
-Interview the user relentlessly until you both understand exactly what they want to learn. Treat it
-as a **decision tree**: each answer opens the questions that hang off it.
+Interview the user until you both understand exactly what they want to learn. Treat it as a
+**decision tree**: each answer opens the questions that hang off it.
 
 Work in **rounds**. The **frontier** is every question you can ask now without guessing at answers
-you haven't heard yet. Ask the whole frontier in one round, number each question, give your
-recommended answer, then wait. A question that depends on another question still open in this
-round belongs to a later round.
+you haven't heard yet. A question that depends on another question still open in this round belongs
+to a later round.
 
-Format each round like this:
+**At most three questions per round.** If more are open, ask the three that the most others hang
+off, and keep the rest for the next round. A wall of questions is what makes setup feel like an
+exam.
+
+Don't ask what you can already tell from their answers. Put your reading in the summary at the end
+for them to correct.
+
+Format each round like this. In the first round only, put this line above the first question:
+"Reply with the number and **yes** to take my suggestion (`Q1 yes`), or answer in your own words."
 
 ```
 ❓ **Q1** - **<short title>**: <the question, with options if there are any>
@@ -136,14 +139,14 @@ IFRS 17?"; propose them and ask whether that's the right cut.
 
 The branches to cover. Not every area needs every one, and answers will open others:
 
-1. **Boundary.** The area itself is settled above. Here: what exactly is in, and what's next door
-   but out?
+1. **Boundary.** The area itself is settled in step 1. Here: what exactly is in, and what's next
+   door but out?
 2. **Why now.** Exam, new job, a project, curiosity? This sets how practical the questions get.
 3. **Where they'll use it.** Role, industry, tools, who they explain it to. This is what makes the
    scenario questions from score 35 up feel real. Their own setup is fine as scenery, but topics
    stay on the field: company specifics go stale, and the field underneath lasts.
 4. **Where they are now.** What they can already do and what confuses them, in their words. Don't
-   take "intermediate" at face value; the check questions under Starting scores test it.
+   take "intermediate" at face value; the warm-up in step 4 tests it.
 5. **Depth versus breadth.** Fewer topics in depth, or a wide map?
 6. **Standards and versions.** Which jurisdiction, framework, dialect or version. (UK or US GAAP,
    Postgres or T-SQL, Python 3.12.)
@@ -152,8 +155,8 @@ The branches to cover. Not every area needs every one, and answers will open oth
    of answers, credit for the essence. Ask only whether they want it more direct. Tone changes the
    wording, never the scoring.
 
-The grill is done when the frontier is empty: every branch visited, nothing silently assumed.
-Then summarise what you heard in five or six lines and ask the user to confirm before moving on.
+Step 2 is done when the frontier is empty: every branch visited, nothing silently assumed. Then
+summarise what you heard in five or six lines and ask the user to confirm before moving on.
 
 ### Map the field (for yourself)
 
@@ -168,7 +171,7 @@ Before proposing topics, sketch the field. Don't show the sketch; it shapes the 
    **classic misconceptions** learners in this field hold. That's where the questions bite.
 4. **Cut to the user's goal and boundary**, and group what's left into topics.
 
-### Topic list
+### Step 3: Topics
 
 Propose 5 to 8 topics. Fewer topics come round more often, so each one gets drilled. Go up to 15
 only if the user asked for a wide map (branch 5). For each give:
@@ -186,23 +189,27 @@ Order the list basics first: new topics are asked in list order. Open with one l
 source you anchored on. Present it as a numbered list and let the user add, cut, merge, split or
 reword. Repeat until they approve.
 
-### Starting scores
+### Step 4: Starting level
 
 Only after the topic list is approved.
 
-**Check questions first.** One round of two or three short questions, each on a different topic,
-at Foundation level, answerable in a sentence or two. Pick the topics where you're least sure of
-their level. Say they're not scored. Don't teach; one line on each answer is enough.
+**Warm-up first.** Introduce it in your own words along these lines: "A quick warm-up so I start
+you at the right level. It isn't scored, and 'not sure' is a perfectly good answer: it just means
+we start with the basics." Then one round of two or three short questions, each on a different
+topic, at Foundation level, answerable in a sentence or two. Pick the topics where you're least
+sure of their level. Don't teach; one friendly line on each answer is enough.
 
-Then show the three bands from `reference/scoring.md` in plain words and propose a starting score
-for each topic, with a one-line reason. Word it so "yes" accepts, and let them change any of them.
+Then propose a starting score for each topic in plain words, as a numbered list with a one-line
+reason each, e.g. "I'd start you at 15 on most of these, and 25 on joins because you explained
+them well." Add one line on why low is normal: starting high skips the basics. Don't show the band
+table. Word it so "yes" accepts, and let them change any of them.
 
-- Base every score on the check answers and what they told you in branch 4. Don't set one number
+- Base every score on the warm-up answers and what they told you in branch 4. Don't set one number
   for every topic, and don't guess where they gave you nothing to go on: ask.
 - Most topics land at 15 to 20, lower if the topic is new to them. Starting high skips the basics,
   and the basics are where most of the learning is.
-- Above 20 only where they showed real knowledge in the check questions or the grill. If they want higher, ask them to
-  explain the core idea of that topic in a sentence or two. If they can't, suggest 20.
+- Above 20 only where they showed real knowledge in the warm-up or step 2. If they want higher,
+  ask them to explain the core idea of that topic in a sentence or two. If they can't, suggest 20.
 - **Nothing above 50.** The script refuses it.
 
 ### Daily reminder
@@ -255,11 +262,17 @@ to their calendar. If they ask for a reminder later, from an area skill, run the
 2. Run `python3 <skill>/scripts/ht.py init --file /tmp/hammer-time-spec.json`. If it errors, fix
    the spec and run it again. Don't work around it.
 3. If they wanted a reminder, run `reminder` now.
-4. Run `package` and finish with the save message from `guides/updating.md`. Then add:
+4. Run `package` and finish with the save message from `guides/updating.md`. This is the first
+   time they handle a skill file, so in place of the topic headline write one line saying what it
+   is: "**Your new skill is ready: `<skill name>`.** It holds your topics and starting scores."
+   After the save block, add:
    - how to start: "Tomorrow, open a new chat and type **hammer time <area words>**." (the skill
      name without `hammer-time-`, hyphens as spaces)
    - their onboarding skill is untouched, so they can type "hammer time" again for another subject.
    - if you made a reminder: open the `.ics` file to add it to their calendar.
+   - sharing: the new skill holds what they told you about their role and goals, so share
+     `hammer-time-onboarding` with colleagues, not this one.
+   - "Ask **how does Hammer Time work?** any time."
 
 Don't ask a first quiz question in the same run. Saving is the whole point of this step.
 
@@ -273,7 +286,7 @@ harder version; never force it.
 1. Ask a short grill, one or two rounds, about where they want to go next with this topic. Propose
    the harder topic: "Joins and their traps" might become "Query plans and join performance".
 2. Agree a title and a description, written the same way as in Part A.
-3. Starting score: ask one check question on the new topic, as in Part A. If they nail it, 30;
+3. Starting score: ask one warm-up question on the new topic, as in step 4 of Part A. If they nail it, 30;
    otherwise 15 to 20 (default 20). The new topic has its own basics, and starting low means they
    get asked. The cap is still 50.
 4. Run:

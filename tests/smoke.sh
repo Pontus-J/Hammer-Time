@@ -65,6 +65,12 @@ ok "onboarding packaged as hammer-time-sql"
 DIFF="$(diff -rq "$REPO/hammer-time-onboarding" "$T/out/hammer-time-sql" | grep -v -e "SKILL.md differ" -e "Only in $T/out/hammer-time-sql: state.json" || true)"
 [ -z "$DIFF" ] || fail "rules files changed in the package: $DIFF"
 ok "every rules file is byte-identical in the package"
+for h in "## Welcome" "## The big picture"; do
+  grep -q "^$h$" "$T/out/hammer-time-sql/README.md" || fail "README.md in the package needs '$h'; SKILL.md and onboarding.md point to it"
+done
+grep -q "^description: .*what Hammer Time is and how it works" "$T/out/hammer-time-sql/SKILL.md" || fail "area description should trigger on explain requests"
+grep -q "^description: .*what Hammer Time is or how it works" "$REPO/hammer-time-onboarding/SKILL.md" || fail "template description should trigger on explain requests"
+ok "README.md ships with Welcome and Big picture, and both descriptions trigger on explain requests"
 python3 "$H" status | grep -q "MODE: onboarding" || fail "template should still be blank"
 ok "onboarding template left untouched"
 

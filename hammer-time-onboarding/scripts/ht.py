@@ -405,8 +405,9 @@ def rewrite_frontmatter(d, skill_name, area_title):
     words = skill_name[len("hammer-time-"):].replace("-", " ")
     desc = ("Hammer Time drill for %s: type \"hammer time %s\" for today's question. A Socratic quiz "
             "that tracks a 0-100 score per topic and re-saves itself with the new scores. Use ONLY "
-            "when the user explicitly asks for \"hammer time %s\", \"/%s\", or a Hammer Time "
-            "progress review for %s. Do not use for ordinary questions about %s." % (
+            "when the user explicitly asks for \"hammer time %s\", \"/%s\", a Hammer Time "
+            "progress review for %s, or what Hammer Time is and how it works. Do not use for "
+            "ordinary questions about %s." % (
                 area_title, words, words, skill_name, area_title, area_title))
     desc = desc.replace("<", "").replace(">", "")
     if len(desc) > DESCRIPTION_MAX:
