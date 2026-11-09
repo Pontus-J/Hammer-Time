@@ -73,7 +73,7 @@ Two files do:
 | file | what | changes |
 |---|---|---|
 | `SKILL.md` | this router | renamed once, by `init` |
-| `state.json` | area, profile, topics, scores, last 20 answers | only through `ht.py`; never read it, use `status` or `show` |
+| `state.json` | area, profile, topics, scores, every question asked, last 20 answers | only through `ht.py`; never read it, use `status` or `show` |
 
 ## Platform notes
 

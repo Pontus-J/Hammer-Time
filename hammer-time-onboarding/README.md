@@ -51,7 +51,7 @@ Hammer Time comes as two kinds of skill:
 | skill | what it is | what you do with it |
 |---|---|---|
 | `hammer-time-onboarding` | The one you installed first. It sets up a new subject and never changes. | Keep it. Type **hammer time** to set up another subject. |
-| `hammer-time-<subject>`, e.g. `hammer-time-fpa` | Made at the end of setup, one per subject. It holds your topics, scores and recent answers. | Use it every day: type **hammer time fpa**. |
+| `hammer-time-<subject>`, e.g. `hammer-time-fpa` | Made at the end of setup, one per subject. It holds your topics, scores and every question you've been asked. | Use it every day: type **hammer time fpa**. |
 
 Deleting a subject skill deletes its scores.
 
@@ -76,7 +76,8 @@ Then, if you want, a daily calendar reminder, and you save your new skill.
 1. Open a new chat and type **hammer time fpa** (your subject's name).
 2. Claude picks the topic that's due: new topics first, then the one asked least recently. Never
    the same topic twice in a row. You can also ask for a topic.
-3. One question. Answer in a few sentences, in your own words.
+3. One question, never one you've had before. Now and then it comes back to something you found
+   hard weeks ago, from a new angle. Answer in a few sentences, in your own words.
 4. If you've got it, Claude says what you got right and adds a bit of detail. If not, it gives you
    hints, up to three, and lets you work it out. Say "I don't know" and it helps you make a guess;
    say it again and it gives you the answer.
@@ -120,8 +121,8 @@ Nothing else breaks.
 ### Things you can ask for
 
 - **hammer time fpa**: today's question
-- **hammer time fpa review**: where you stand, what keeps tripping you up, your weakest topics, and
-  a chance to add, cut, merge or reword topics
+- **hammer time fpa review**: where you stand, how many questions you've answered, how far each
+  topic has come, what keeps tripping you up, and a chance to add, cut, merge or reword topics
 - a question on a particular topic
 - a harder version of a topic once it reaches 90
 - a daily reminder: a calendar event to add to your calendar
@@ -138,7 +139,8 @@ Your subject skill keeps:
 - what you said in setup: your role, goal and context, where you started, what to leave out, and
   your preferred tone and language
 - your topics and their scores
-- your last 20 answers, each with a one-line note on what you showed and what was missing
+- every question you've been asked, with the date, the result and a one-line note on what you
+  showed and what was missing. Your answers and the back and forth aren't kept.
 
 It lives in your Claude account, or on your computer in Claude Code, like any other skill. Hammer
 Time itself sends nothing anywhere.
@@ -160,6 +162,8 @@ own.
   scored normally.
 - **Too easy or too hard.** Questions follow your score, so they adjust within a week or two. For
   bigger changes, ask for a review and change the topics.
+- **You've been away.** Nothing is lost. After two weeks or more, the first question back starts a
+  little easier.
 - **You want to start a subject over.** Delete the subject skill (**Settings > Capabilities >
   Skills** on claude.ai, or its folder in `~/.claude/skills/` in Claude Code), then type
   **hammer time** to set it up again.

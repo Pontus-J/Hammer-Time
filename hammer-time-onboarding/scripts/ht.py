@@ -23,7 +23,7 @@ import tempfile
 import unicodedata
 import zipfile
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # 2: every question kept per topic in `history`
 
 # Scoring ladder. Flat across all bands, symmetric at the ends.
 RESULTS = {
@@ -40,7 +40,10 @@ LEVELUP_DEFAULT = 20    # where a levelled-up topic starts unless the user says 
 LEVELUP_THRESHOLD = 90  # at or above this, suggest a harder version of the topic
 MIN_TOPICS, MAX_TOPICS = 5, 15
 LOG_LIMIT = 20
-RECENT_LIMIT = 3  # results kept per topic, so questions don't repeat once the log has moved on
+RECENT_LIMIT = 3  # results the brief shows with their notes
+QUESTIONS_SHOWN = 25  # earlier questions the brief lists so they aren't repeated; all are kept
+GAPS_SHOWN = 5  # older partial or missed results the brief lists, to come back to
+WELCOME_BACK_DAYS = 14  # a gap this long gets a welcome back and an easier start
 TITLE_MAX = 60          # keeps the generated SKILL.md description under claude.ai's 1024 limit
 DESCRIPTION_MAX = 1024
 RESERVED_WORDS = ("anthropic", "claude")  # claude.ai refuses skill names containing these
@@ -270,13 +273,32 @@ def table(state):
     return "\n".join(rows)
 
 
+def topic_history(state, t):
+    """Every question asked on a topic, oldest first.
+
+    Skills scored before `history` was stored kept only the last few results per topic
+    (`recent`) and the shared log, without the questions, so they rebuild what they can.
+    """
+    if "history" in t:
+        return t["history"]
+    log = [e for e in state.get("log", []) if e["topic"] == t["id"]]
+    seen = {(e["date"], e["result"], e["note"]) for e in log}
+    older = [e for e in reversed(t.get("recent", [])) if (e["date"], e["result"], e["note"]) not in seen]
+    return [{"date": e["date"], "question": None, "result": e["result"],
+             "score_after": e.get("score_after"), "note": e["note"]} for e in older + log]
+
+
+def one_line(text):
+    return " ".join(text.split())
+
+
 def print_brief(state, t):
     """Everything Claude needs to ask about one topic, so it never reads state.json itself."""
     print("TOPIC: %s %s" % (t["id"], t["title"]))
     print("SCORE: %d, %s band, step: %s" % (t["score"], band(t["score"]), step(t["score"])))
     print("DESCRIPTION: %s" % t["description"])
-    # Skills scored before `recent` was stored fall back to the log.
-    recent = t.get("recent") or [e for e in reversed(state["log"]) if e["topic"] == t["id"]][:RECENT_LIMIT]
+    hist = topic_history(state, t)
+    recent = hist[::-1][:RECENT_LIMIT]
     if recent:
         print("LAST TIME: %s, %s. %s" % (recent[0]["date"], recent[0]["result"], recent[0]["note"]))
         for e in recent[1:]:
@@ -285,6 +307,22 @@ def print_brief(state, t):
         print("LAST TIME: %s, result no longer in the log" % t["last_asked"])
     else:
         print("LAST TIME: never asked")
+    if hist:
+        counts = ", ".join("%d %s" % (n, r) for r, n in (
+            (r, sum(e["result"] == r for e in hist)) for r in RESULTS) if n)
+        print("ASKED: %d times, started at %s. Saved results: %s" % (
+            t["times_asked"], t.get("start_score", "?"), counts))
+        shown = hist[::-1][:QUESTIONS_SHOWN]
+        print("QUESTIONS ASKED BEFORE, newest first%s. Don't repeat or closely rephrase any of them:" % (
+            " (latest %d of %d)" % (len(shown), len(hist)) if len(hist) > len(shown) else ""))
+        for e in shown:
+            print("- %s: %s" % (e["date"], one_line(e["question"]) if e["question"]
+                                else "(question not saved) " + e["note"]))
+        gaps = [e for e in hist[:-RECENT_LIMIT][::-1] if e["result"] in ("partial", "missed")][:GAPS_SHOWN]
+        if gaps:
+            print("EARLIER GAPS (partial or missed, before the last %d):" % RECENT_LIMIT)
+            for e in gaps:
+                print("- %s, %s. %s" % (e["date"], e["result"], e["note"]))
     print("PROFILE:")
     for k, v in (state.get("profile") or {}).items():
         print("- %s: %s" % (k, v))
@@ -307,6 +345,13 @@ def cmd_status(args):
         return
     print("MODE: active")
     print("AREA: %s (skill name %s)" % (state["area"]["title"], state["skill_name"]))
+    asked = [t["last_asked"] for t in state["topics"] + state.get("archived_topics", []) if t["last_asked"]]
+    if asked:
+        days = (dt.date.today() - dt.date.fromisoformat(max(asked))).days
+        print("LAST RUN: %s, %d days ago%s" % (max(asked), days, (
+            ". Welcome them back and lean easier (guides/asking.md)" if days >= WELCOME_BACK_DAYS else "")))
+    else:
+        print("LAST RUN: never")
     print_saving()
     wd = active_dir()
     if wd != SKILL_DIR and not os.path.isfile(packaged_marker(wd)):
@@ -421,17 +466,23 @@ def rewrite_frontmatter(d, skill_name, area_title):
 
 
 def cmd_score(args):
-    wd, state = begin_change()
     if not args.note.strip():
         die("--note can't be empty. Reviews are written from these notes")
+    question = (sys.stdin.read() if args.question == "-" else args.question).strip()
+    if not question:
+        die("--question can't be empty. Later runs read it so they don't ask it again")
+    wd, state = begin_change()
     t = find_topic(state, args.topic)
     delta = RESULTS[args.result]
     before = t["score"]
     t["score"] = clamp(before + delta)
     t["times_asked"] += 1
     t["last_asked"] = today()
-    t["recent"] = ([{"date": today(), "result": args.result, "note": args.note.strip()}]
-                   + t.get("recent", []))[:RECENT_LIMIT]
+    t["history"] = topic_history(state, t) + [{
+        "date": today(), "question": question, "result": args.result,
+        "score_after": t["score"], "note": args.note.strip()}]
+    t.pop("recent", None)
+    state["schema_version"] = SCHEMA_VERSION
     entry = {
         "date": today(),
         "topic": t["id"],
@@ -538,12 +589,22 @@ def cmd_review(args):
     prev = state.get("last_review", {})
     print("AREA: %s" % state["area"]["title"])
     print("LAST REVIEW: %s" % prev.get("date", "never"))
+    every = state["topics"] + state.get("archived_topics", [])
+    total = sum(t["times_asked"] for t in every)
+    days = {e["date"] for t in every for e in topic_history(state, t)}
+    print("ANSWERED: %d questions since %s, on %d different days" % (
+        total, state["area"].get("created", "?"), len(days)))
     print()
-    rows = ["| id | topic | score | band | since last review |", "|---|---|---|---|---|"]
+    rows = ["| id | topic | score | band | since last review | asked | first try | started at |",
+            "|---|---|---|---|---|---|---|---|"]
     for t in state["topics"]:
         old = prev.get("scores", {}).get(t["id"])
         change = "new" if old is None else "%+d" % (t["score"] - old)
-        rows.append("| %s | %s | %d | %s | %s |" % (t["id"], t["title"], t["score"], band(t["score"]), change))
+        hist = topic_history(state, t)
+        first = "%d of %d" % (sum(e["result"] == "first_try" for e in hist), len(hist)) if hist else "-"
+        rows.append("| %s | %s | %d | %s | %s | %d | %s | %s |" % (
+            t["id"], t["title"], t["score"], band(t["score"]), change, t["times_asked"], first,
+            t.get("start_score", "?")))
     print("\n".join(rows))
     print()
     print("LAST %d ANSWERS (oldest first, the log keeps %d):" % (len(state["log"]), LOG_LIMIT))
@@ -567,9 +628,10 @@ def cmd_review(args):
     if never:
         print("NEVER ASKED: " + ", ".join("%s %s" % (t["id"], t["title"]) for t in never))
     # Topic-shape signals: the same result on every one of a topic's last few answers.
-    full = [t for t in state["topics"] if len(t.get("recent", [])) == RECENT_LIMIT]
-    easy = [t for t in full if all(e["result"] == "first_try" for e in t["recent"])]
-    stuck = [t for t in full if all(e["result"] in ("partial", "missed") for e in t["recent"])]
+    last = {t["id"]: topic_history(state, t)[-RECENT_LIMIT:] for t in state["topics"]}
+    full = [t for t in state["topics"] if len(last[t["id"]]) == RECENT_LIMIT]
+    easy = [t for t in full if all(e["result"] == "first_try" for e in last[t["id"]])]
+    stuck = [t for t in full if all(e["result"] in ("partial", "missed") for e in last[t["id"]])]
     if easy:
         print("ALWAYS FIRST TRY (last %d): " % RECENT_LIMIT
               + ", ".join("%s %s (%d)" % (t["id"], t["title"], t["score"]) for t in easy))
@@ -727,6 +789,8 @@ def main():
     s.add_argument("--topic", required=True)
     s.add_argument("--result", required=True, choices=sorted(RESULTS))
     s.add_argument("--note", required=True, help="one line: what they showed or what was missing")
+    s.add_argument("--question", required=True,
+                   help="the question as asked, so later runs don't repeat it; - reads it from stdin")
     s.set_defaults(fn=cmd_score)
 
     s = sub.add_parser("levelup", help="archive a topic and replace it with a harder version")

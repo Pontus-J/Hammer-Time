@@ -50,8 +50,8 @@ Hammer Time skill and Claude answers from it, using your own topics and scores.
 
 The skill changes itself after every run, and a model asked to rewrite a long file while changing
 one number will eventually paraphrase a rule or drop a line without anyone noticing. So the model
-never rewrites anything. `scripts/ht.py` changes the scores in `state.json`, keeps a log of the last
-20 answers, picks the next topic, and repackages the skill as an exact copy of what's installed plus
+never rewrites anything. `scripts/ht.py` changes the scores in `state.json`, keeps every question
+asked per topic (so none is repeated) and a log of the last 20 answers, picks the next topic, and repackages the skill as an exact copy of what's installed plus
 the new state. The model runs the conversation; the script keeps the books.
 
 ## Install

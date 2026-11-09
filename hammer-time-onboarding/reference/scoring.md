@@ -13,7 +13,8 @@ A score is how deep the user's understanding of one topic goes. It is not a coun
 ## Difficulty gradient
 
 Pitch each question at the step for the topic's current score. Within a step, lean harder if the
-last answer on this topic (`LAST TIME` in the brief) was `first_try`, easier if it was `missed`.
+last answer on this topic (`LAST TIME` in the brief) was `first_try`, easier if it was `missed`
+or if `status` says to welcome them back.
 
 | score | step | example shape |
 |---|---|---|
@@ -49,4 +50,5 @@ Scores stay between 0 and 100. `ht.py` applies this; you only pick the result.
 - 5 to 15 active topics; 5 to 8 recommended.
 - Starting scores: 0 to 50. Proposed from what the user said; most land at 15-20, above 20 only if the user can explain the basics unprompted.
 - A topic at 90+ is offered a harder version. The harder version starts at 15-20 (default 20), or 30 if the user nails a warm-up question on it.
-- The log keeps the last 20 answers.
+- Every question asked is kept for good, per topic. The brief lists the latest 25.
+- The log keeps the last 20 answers across all topics, with notes, for reviews.

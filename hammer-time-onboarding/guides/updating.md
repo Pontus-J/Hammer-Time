@@ -5,9 +5,14 @@ How every state-changing run ends: record it, package it, get the user to save i
 ## 1. Record
 
 ```
-python3 <skill>/scripts/ht.py score --topic t03 --result guided --note "Asked why a LEFT JOIN report lost suppliers. Knew unmatched rows are kept; missed that WHERE on the right table turns it into an inner join"
+python3 <skill>/scripts/ht.py score --topic t03 --result guided --note "Asked why a LEFT JOIN report lost suppliers. Knew unmatched rows are kept; missed that WHERE on the right table turns it into an inner join" --question - <<'EOF'
+Finance's supplier report uses a LEFT JOIN from suppliers to payments, but suppliers with no payments this month have disappeared. What's the likely cause?
+EOF
 ```
 
+- `--question` is the question exactly as you asked it, without the header lines around it (the
+  rephrased version if you rephrased it). Always pass it through the quoted heredoc as shown, so
+  quotes, `$` and line breaks arrive intact. It's kept for good, so later runs don't ask it again.
 - `--result` is one of `first_try`, `guided`, `partial`, `missed` (see `reference/scoring.md`).
 - `--note` is one line. Start with what you asked, then what they showed and what was missing.
   Later questions avoid repeats and reviews find patterns from these notes, so make it specific

@@ -36,7 +36,7 @@ python3 "$H" init --file "$T/bad.json" 2>/dev/null && fail "score 51 should be r
 ok "starting score above 50 refused"
 python3 "$H" package --out "$T/out" 2>/dev/null && fail "package before init should be refused"
 ok "package refused before onboarding finished"
-python3 "$H" score --topic t01 --result missed --note "n" 2>/dev/null && fail "score before init should be refused"
+python3 "$H" score --topic t01 --result missed --question "q" --note "n" 2>/dev/null && fail "score before init should be refused"
 [ -d "$TMPDIR/hammer-time-work/hammer-time-onboarding" ] && fail "refused score left a work copy behind"
 ok "refused command leaves no work copy"
 
@@ -80,7 +80,7 @@ H="$T/skills/hammer-time-sql/scripts/ht.py"
 python3 "$H" status | grep -q "SUGGESTED NEXT: t01" || fail "should suggest t01 (never asked, lowest score)"
 ok "topic choice: least recently asked, then lowest score"
 
-python3 "$H" score --topic t01 --result missed --note "n" | grep -q "SCORE: 10 -> 5" || fail "missed should be -5"
+python3 "$H" score --topic t01 --result missed --question "q" --note "n" | grep -q "SCORE: 10 -> 5" || fail "missed should be -5"
 python3 "$H" status | grep -q "SUGGESTED NEXT: t02" || fail "should not repeat t01"
 ok "missed is -5, and the same topic is not asked twice in a row"
 python3 - "$REPO" <<'EOF2'
@@ -112,32 +112,65 @@ for lowest, name in ht.STEPS:
     assert "| %s |" % name in ref, "step %r missing from scoring.md" % name
 EOF2
 ok "status and show hand Claude the topic brief; steps match scoring.md"
-python3 "$H" score --topic t02 --result missed --note "" 2>/dev/null && fail "empty note should be refused"
+python3 "$H" score --topic t02 --result missed --question "q" --note "" 2>/dev/null && fail "empty note should be refused"
 python3 "$H" score --topic t02 --result missed 2>/dev/null && fail "missing note should be refused"
 ok "score needs a note"
-python3 "$H" score --topic t01 --result missed --note "n" | grep -q "SCORE: 5 -> 0" || fail "floor at 0"
-python3 "$H" score --topic t01 --result missed --note "n" | grep -q "SCORE: 0 -> 0" || fail "floor at 0"
+python3 "$H" score --topic t02 --result missed --note "n" 2>/dev/null && fail "missing question should be refused"
+echo "  " | python3 "$H" score --topic t02 --result missed --note "n" --question - 2>/dev/null && fail "empty question should be refused"
+ok "score needs the question"
+python3 "$H" score --topic t01 --result missed --question "q" --note "n" | grep -q "SCORE: 5 -> 0" || fail "floor at 0"
+python3 "$H" score --topic t01 --result missed --question "q" --note "n" | grep -q "SCORE: 0 -> 0" || fail "floor at 0"
 ok "score floors at 0"
-python3 "$H" score --topic t05 --result first_try --note "a" | grep -q "SCORE: 50 -> 55" || fail "first_try +5"
-python3 "$H" score --topic t05 --result guided --note "b" | grep -q "SCORE: 55 -> 57" || fail "guided +2"
-python3 "$H" score --topic t05 --result partial --note "c" | grep -q "SCORE: 57 -> 57" || fail "partial 0"
+python3 "$H" score --topic t05 --result first_try --question "Question A" --note "a" | grep -q "SCORE: 50 -> 55" || fail "first_try +5"
+python3 "$H" score --topic t05 --result guided --question "Question B" --note "b" | grep -q "SCORE: 55 -> 57" || fail "guided +2"
+python3 "$H" score --topic t05 --result partial --question "Question C" --note "c" | grep -q "SCORE: 57 -> 57" || fail "partial 0"
 ok "ladder +5 / +2 / 0"
-python3 "$H" score --topic t05 --result partial --note "d" >/dev/null
+python3 "$H" score --topic t05 --result partial --note "d" --question - >/dev/null <<'EOF'
+What's $4m of
+  accrued revenue?
+EOF
 python3 "$H" show --topic t05 | grep -A2 "^LAST TIME" > "$T/recent"
 grep -q "^LAST TIME: .*, partial. d$" "$T/recent" || fail "latest result first"
 [ "$(grep -c "^BEFORE THAT" "$T/recent")" = 2 ] || fail "brief should carry two earlier results"
 grep -q "^BEFORE THAT: .*, guided. b$" "$T/recent" || fail "earlier results newest first"
-python3 "$H" show --topic t05 | grep -q ", first_try. a$" && fail "only the last three results are kept"
+python3 "$H" show --topic t05 | grep -q ", first_try. a$" && fail "only the last three results come with notes"
 ok "brief shows the last three results on the topic"
+python3 "$H" show --topic t05 | grep -A4 "^QUESTIONS ASKED BEFORE" > "$T/asked"
+sed -n 2p "$T/asked" | grep -q ": What's \$4m of accrued revenue?$" || fail "question from stdin, kept verbatim on one line, newest first: $(cat "$T/asked")"
+sed -n 5p "$T/asked" | grep -q ": Question A$" || fail "every earlier question is listed, not just the last three"
+python3 "$H" show --topic t05 | grep -q "^ASKED: 4 times, started at 50. Saved results: 1 first_try, 1 guided, 2 partial$" || fail "brief should count results"
+python3 "$H" show --topic t05 | grep -q "^EARLIER GAPS" && fail "no gaps older than the last three yet"
+python3 "$H" score --topic t05 --result first_try --question "Question E" --note "e" >/dev/null
+python3 "$H" score --topic t05 --result first_try --question "Question F" --note "f" >/dev/null
+python3 "$H" show --topic t05 | grep -A1 "^EARLIER GAPS" | grep -q ", partial. c$" || fail "older partial results should be listed as gaps"
+ok "brief lists every earlier question and older gaps"
+python3 - "$REPO" <<'EOF2'
+import sys; sys.path.insert(0, sys.argv[1] + "/hammer-time-onboarding/scripts"); import ht
+# Saved before questions were kept: the last three per topic, plus whatever the log still has.
+t = {"id": "t1", "recent": [{"date": "2026-01-05", "result": "guided", "note": "n5"},
+                            {"date": "2026-01-04", "result": "missed", "note": "n4"},
+                            {"date": "2026-01-01", "result": "partial", "note": "n1"}]}
+log = [{"date": "2026-01-04", "topic": "t1", "result": "missed", "note": "n4", "score_after": 10},
+       {"date": "2026-01-05", "topic": "t1", "result": "guided", "note": "n5", "score_after": 12}]
+h = ht.topic_history({"log": log}, t)
+assert [e["note"] for e in h] == ["n1", "n4", "n5"], h
+assert h[0]["question"] is None and h[2]["score_after"] == 12
+EOF2
+ok "skills saved before questions were kept rebuild their history"
 
-i=0; while [ $i -lt 20 ]; do python3 "$H" score --topic t02 --result first_try --note "n" >/dev/null; i=$((i+1)); done
+i=0; while [ $i -lt 20 ]; do python3 "$H" score --topic t02 --result first_try --question "q" --note "n" >/dev/null; i=$((i+1)); done
 python3 - "$T" <<'EOF'
 import json, os, sys, tempfile
 s = json.load(open(os.path.join(tempfile.gettempdir(), "hammer-time-work", "hammer-time-sql", "state.json")))
 assert len(s["log"]) == 20, len(s["log"])
-assert [t for t in s["topics"] if t["id"] == "t02"][0]["score"] == 100
+t02 = [t for t in s["topics"] if t["id"] == "t02"][0]
+assert t02["score"] == 100
+assert len(t02["history"]) == 20 and "recent" not in t02, len(t02["history"])
+assert s["schema_version"] == 2
 EOF
-ok "log capped at 20, score capped at 100"
+ok "log capped at 20, every question kept per topic, score capped at 100"
+python3 "$H" status | grep -q "^LAST RUN: [0-9-]*, 0 days ago$" || fail "status should say when the last run was"
+ok "status shows the last run"
 python3 "$H" status | grep -q "READY TO LEVEL UP: t02" || fail "t02 at 100 should be flagged"
 ok "90+ flagged for level up"
 
@@ -160,12 +193,14 @@ grep -q "^SAVE REQUIRED" "$T/pkg" || fail "should say saving is required"
 grep -q "^## 💾 Save the skill now" "$T/pkg" || fail "should print the save block"
 [ -f "$HOME/Downloads/hammer-time-sql.skill" ] || fail "should write the file to ~/Downloads"
 ok "status flags unpackaged changes; a read-only install exports with the save block"
-python3 "$H" score --topic t04 --result partial --note "after export" >/dev/null
+python3 "$H" score --topic t04 --result partial --question "q" --note "after export" >/dev/null
 
 python3 "$H" review | grep -q "Hard t02 | 20 | Foundation | new" || fail "review should mark the level-up topic as new"
 python3 "$H" review | grep -q "t01 | Topic 1 | 0 | Foundation | -10" || fail "review delta after several scores"
 python3 "$H" review | grep -q "^READY TO LEVEL UP" && fail "nothing is at 90+ after the level up"
-ok "review shows deltas since the last review"
+python3 "$H" review | grep -q "^ANSWERED: 30 questions since [0-9-]*, on 1 different days$" || fail "review should total the answers: $(python3 "$H" review | grep ANSWERED)"
+python3 "$H" review | grep -q "| t05 | Topic 5 | 67 | Advanced | +17 | 6 | 3 of 6 | 50 |" || fail "review row should carry asked, first try and start"
+ok "review shows deltas since the last review, totals and first-try counts"
 python3 "$H" review | grep -q "^STUCK.*t01 Topic 1" || fail "three misses in a row should flag the topic as stuck"
 python3 "$H" review | grep -q "^ALWAYS FIRST TRY" && fail "nothing active has three first tries in a row"
 ok "review flags stuck topics"
@@ -180,7 +215,7 @@ assert s["topics"][1]["title"] == "Hard t02"
 EOF
 ok "second package carries level-up, archive and review snapshot"
 python3 "$H" status | grep -q "UNPACKAGED CHANGES" && fail "status right after package should not flag unpackaged changes"
-python3 "$H" score --topic t01 --result first_try --note "one more" | grep -q "SCORE: 0 -> 5" || fail "one more should build on the packaged run"
+python3 "$H" score --topic t01 --result first_try --question "q" --note "one more" | grep -q "SCORE: 0 -> 5" || fail "one more should build on the packaged run"
 python3 "$H" status | grep -q "UNPACKAGED CHANGES" || fail "a score after package should flag unpackaged changes"
 python3 "$H" package --out "$T/out3" >/dev/null
 (cd "$T/out3" && unzip -q hammer-time-sql.skill)
@@ -205,7 +240,7 @@ cp -R "$T/out2/hammer-time-sql" "$T/cc/"
 H="$T/cc/hammer-time-sql/scripts/ht.py"
 [ "$(uname)" = Darwin ] || fail "section 3 needs macOS: local installs are only trusted on macOS and Windows"
 python3 "$H" status | grep -q "^SAVING: .*installs in place" || fail "status should say a local install updates in place"
-python3 "$H" score --topic t01 --result first_try --note "n" >/dev/null
+python3 "$H" score --topic t01 --result first_try --question "q" --note "n" >/dev/null
 python3 "$H" package | grep -q "^INSTALLED: " || fail "plain package should install a local copy"
 python3 "$H" status | grep -q "| t01 | Topic 1 | 5 |" || fail "install should update in place"
 ok "Claude Code: plain package updates a local skill in place"
@@ -229,12 +264,22 @@ python3 "$T/quoted/hammer-time-sql/scripts/ht.py" package --out "$T/qout" >/dev/
 unzip -l "$T/qout/hammer-time-sql.skill" | grep -q ' hammer-time-sql/SKILL.md$' || fail "zip folder should be unquoted"
 ok "a quoted name in SKILL.md (as claude.ai hands it back) packages cleanly"
 
+python3 - "$T/cc/hammer-time-sql/state.json" <<'EOF'
+import json, sys
+s = json.load(open(sys.argv[1]))
+for t in s["topics"] + s["archived_topics"]:
+    t["last_asked"] = t["last_asked"] and "2026-01-01"
+json.dump(s, open(sys.argv[1], "w"))
+EOF
+python3 "$H" status | grep -q "^LAST RUN: 2026-01-01, .*Welcome them back" || fail "a long gap should get a welcome back"
+ok "a long gap since the last run gets a welcome back"
+
 # 4. Places where installing in place would silently lose the run ------------------
 cloud_case() {  # cloud_case <label> <expected reason>; $H set, run with any env already exported
   rm -rf "$TMPDIR/hammer-time-work" "$HOME/Downloads/hammer-time-sql.skill"
   before="$(python3 "$H" status | grep "| t01 |")"
   python3 "$H" status | grep -q "^SAVING: .*must save" || fail "$1: status should say the user must save"
-  python3 "$H" score --topic t01 --result first_try --note "cloud" >/dev/null
+  python3 "$H" score --topic t01 --result first_try --question "q" --note "cloud" >/dev/null
   python3 "$H" package --install > "$T/pkg" || fail "$1: package --install should export, not fail"
   grep -q "^NOT INSTALLED: $2" "$T/pkg" || fail "$1: should refuse to install: $(cat "$T/pkg")"
   grep -q "^## 💾 Save the skill now" "$T/pkg" || fail "$1: should print the save block"
