@@ -138,12 +138,7 @@ ok "brief shows the last three results on the topic"
 python3 "$H" show --topic t05 | grep -A4 "^QUESTIONS ASKED BEFORE" > "$T/asked"
 sed -n 2p "$T/asked" | grep -q ": What's \$4m of accrued revenue?$" || fail "question from stdin, kept verbatim on one line, newest first: $(cat "$T/asked")"
 sed -n 5p "$T/asked" | grep -q ": Question A$" || fail "every earlier question is listed, not just the last three"
-python3 "$H" show --topic t05 | grep -q "^ASKED: 4 times, started at 50. Saved results: 1 first_try, 1 guided, 2 partial$" || fail "brief should count results"
-python3 "$H" show --topic t05 | grep -q "^EARLIER GAPS" && fail "no gaps older than the last three yet"
-python3 "$H" score --topic t05 --result first_try --question "Question E" --note "e" >/dev/null
-python3 "$H" score --topic t05 --result first_try --question "Question F" --note "f" >/dev/null
-python3 "$H" show --topic t05 | grep -A1 "^EARLIER GAPS" | grep -q ", partial. c$" || fail "older partial results should be listed as gaps"
-ok "brief lists every earlier question and older gaps"
+ok "brief lists every earlier question, newest first"
 python3 - "$REPO" <<'EOF2'
 import sys; sys.path.insert(0, sys.argv[1] + "/hammer-time-onboarding/scripts"); import ht
 # Saved before questions were kept: the last three per topic, plus whatever the log still has.
@@ -154,7 +149,7 @@ log = [{"date": "2026-01-04", "topic": "t1", "result": "missed", "note": "n4", "
        {"date": "2026-01-05", "topic": "t1", "result": "guided", "note": "n5", "score_after": 12}]
 h = ht.topic_history({"log": log}, t)
 assert [e["note"] for e in h] == ["n1", "n4", "n5"], h
-assert h[0]["question"] is None and h[2]["score_after"] == 12
+assert h[0]["question"] is None
 EOF2
 ok "skills saved before questions were kept rebuild their history"
 
@@ -168,9 +163,8 @@ assert t02["score"] == 100
 assert len(t02["history"]) == 20 and "recent" not in t02, len(t02["history"])
 assert s["schema_version"] == 2
 EOF
-ok "log capped at 20, every question kept per topic, score capped at 100"
-python3 "$H" status | grep -q "^LAST RUN: [0-9-]*, 0 days ago$" || fail "status should say when the last run was"
-ok "status shows the last run"
+python3 "$H" show --topic t02 | grep -q "^QUESTIONS ASKED BEFORE, all 20, newest first" || fail "brief should list all 20 questions"
+ok "log capped at 20, every question kept and shown per topic, score capped at 100"
 python3 "$H" status | grep -q "READY TO LEVEL UP: t02" || fail "t02 at 100 should be flagged"
 ok "90+ flagged for level up"
 
@@ -198,9 +192,7 @@ python3 "$H" score --topic t04 --result partial --question "q" --note "after exp
 python3 "$H" review | grep -q "Hard t02 | 20 | Foundation | new" || fail "review should mark the level-up topic as new"
 python3 "$H" review | grep -q "t01 | Topic 1 | 0 | Foundation | -10" || fail "review delta after several scores"
 python3 "$H" review | grep -q "^READY TO LEVEL UP" && fail "nothing is at 90+ after the level up"
-python3 "$H" review | grep -q "^ANSWERED: 30 questions since [0-9-]*, on 1 different days$" || fail "review should total the answers: $(python3 "$H" review | grep ANSWERED)"
-python3 "$H" review | grep -q "| t05 | Topic 5 | 67 | Advanced | +17 | 6 | 3 of 6 | 50 |" || fail "review row should carry asked, first try and start"
-ok "review shows deltas since the last review, totals and first-try counts"
+ok "review shows deltas since the last review"
 python3 "$H" review | grep -q "^STUCK.*t01 Topic 1" || fail "three misses in a row should flag the topic as stuck"
 python3 "$H" review | grep -q "^ALWAYS FIRST TRY" && fail "nothing active has three first tries in a row"
 ok "review flags stuck topics"
@@ -263,16 +255,6 @@ python3 "$T/quoted/hammer-time-sql/scripts/ht.py" package --out "$T/qout" >/dev/
 [ -f "$T/qout/hammer-time-sql.skill" ] || fail "a quoted name should package as hammer-time-sql.skill: $(ls "$T/qout")"
 unzip -l "$T/qout/hammer-time-sql.skill" | grep -q ' hammer-time-sql/SKILL.md$' || fail "zip folder should be unquoted"
 ok "a quoted name in SKILL.md (as claude.ai hands it back) packages cleanly"
-
-python3 - "$T/cc/hammer-time-sql/state.json" <<'EOF'
-import json, sys
-s = json.load(open(sys.argv[1]))
-for t in s["topics"] + s["archived_topics"]:
-    t["last_asked"] = t["last_asked"] and "2026-01-01"
-json.dump(s, open(sys.argv[1], "w"))
-EOF
-python3 "$H" status | grep -q "^LAST RUN: 2026-01-01, .*Welcome them back" || fail "a long gap should get a welcome back"
-ok "a long gap since the last run gets a welcome back"
 
 # 4. Places where installing in place would silently lose the run ------------------
 cloud_case() {  # cloud_case <label> <expected reason>; $H set, run with any env already exported

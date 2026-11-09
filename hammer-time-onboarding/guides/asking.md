@@ -13,22 +13,16 @@ One run is one Socratic dialogue about one topic. It ends with a score.
   interesting.
 
 `status` ends with a brief for the suggested topic: its description, score and difficulty step,
-its last three results with notes, every earlier question on it, older gaps, and the user's
-profile. If the user picked the topic, get the same brief
-with `python3 <skill>/scripts/ht.py show --topic t04`. Build the question from the brief and ask it
+its last three results with notes, every earlier question on it, and the user's profile. If the
+user picked the topic, get the same brief with `python3 <skill>/scripts/ht.py show --topic t04`. Build the question from the brief and ask it
 in the profile's language.
 
 - Don't repeat or closely rephrase anything under `QUESTIONS ASKED BEFORE`. Cover a part of the
   description it hasn't touched, or the same idea from a clearly new angle.
 - If last time was `partial` or `missed`, aim at the gap the note names, from a new angle.
-- Otherwise, now and then, go back to one of the `EARLIER GAPS` that no later question has
-  covered. Coming back to a gap weeks later is how it sticks.
 
 Don't open `state.json`; the brief has everything, and the file on disk can be older than the
 script's copy.
-
-If `status` says to welcome them back, lean easier within the step, and add one line under the
-question block: "Welcome back! It's been a while, so this one starts a little easier."
 
 ## 2. Ask one question
 

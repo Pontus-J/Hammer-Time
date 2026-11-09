@@ -9,8 +9,7 @@ run.
 python3 <skill>/scripts/ht.py review
 ```
 
-This prints how many questions they've answered and on how many days, every topic with its
-score, band, change since the last review, times asked, first tries and starting score, the last 20
+This prints every topic with its score, band and change since the last review, the last 20
 answers with their notes, topics ready to level up (90+), topics close to it (85-89), topics
 never asked, and topics whose last three results were all first try (`ALWAYS FIRST TRY`) or all
 partial or missed (`STUCK`).
@@ -23,8 +22,7 @@ Keep it short and specific. Base it only on the data; don't invent progress.
 2. **Where you stand**, two or three sentences. Read the notes in the log for patterns: the same
    gap showing up across different topics ("keeps confusing timing with measurement"), strengths
    that carry over, topics drifting because they're rarely asked. Name the pattern and the one
-   thing that would move the most scores. If it helps, one line on the habit (questions answered,
-   days) and how far each topic has come from its starting score.
+   thing that would move the most scores.
 3. **Weakest topics**, the two or three lowest, each with one line on what's holding it back if the
    notes show it.
 4. **Ready for harder**, any topic at 90+: offer a harder version (`guides/onboarding.md`, part B).
